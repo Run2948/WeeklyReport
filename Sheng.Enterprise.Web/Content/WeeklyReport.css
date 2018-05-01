@@ -1,0 +1,76 @@
+﻿@charset "utf-8";
+
+.weekTab {
+	float:left;
+	height:50px;
+	 line-height:50px;
+	 padding-left:15px; 
+	 padding-right:15px;
+}
+
+.weekTab_active {
+	background-color: #FFA33C;
+	color: #FFF;
+}
+
+.weekTab a {
+	color: #2494B5;
+	text-decoration: none;
+}
+
+.weekTab a:hover{
+	color: #F00;
+	text-decoration: none;
+}
+
+.input_weeklyReportPost {
+	font-size: 16px;
+	width: 100%;
+	font-family: "宋体";
+	border-top-width: 1px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 1px;
+	border-top-style: none;
+	border-right-style: none;
+	border-bottom-style: solid;
+	border-left-style: none;
+	border-top-color: #BBBBBB;
+	border-right-color: #BBBBBB;
+	border-bottom-color: #BBBBBB;
+	border-left-color: #BBBBBB;
+}
+
+.td_weeklyReportPost{
+	padding-left:10px;
+	padding-right:10px;
+}
+
+.divSearchWeeklyReportContainer{
+	border: 1px solid #CCCCCC;
+	margin-top:15px;
+	padding:10px;
+}
+
+.divSearchWeeklyReportContainer_blue{
+	border: 1px solid #337AB7;
+	margin-top:15px;
+	padding:10px;
+}
+
+.tdSearchWeeklyReportItem{
+	padding-top: 10px;
+	padding-bottom: 10px;
+	vertical-align:top
+}
+
+#divCheckResult{
+	border: 1px solid red;
+	padding: 10px;
+	margin: 10px;
+}
+
+.div_red{
+	border: 1px solid red;
+	padding:10px;
+}

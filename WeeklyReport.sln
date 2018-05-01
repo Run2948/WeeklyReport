@@ -3,7 +3,49 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sheng.Enterprise.Core", "Sheng.Enterprise.Core\Sheng.Enterprise.Core.csproj", "{405C21F4-E46A-4FCA-A8FE-BDEF9EC130B8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sheng.Enterprise.Infrastructure", "Sheng.Enterprise.Infrastructure\Sheng.Enterprise.Infrastructure.csproj", "{7A6DD850-1725-4238-B03D-EC94A87C392E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sheng.Enterprise.Web", "Sheng.Enterprise.Web\Sheng.Enterprise.Web.csproj", "{04F9D0B8-3CB4-47E5-A325-262C33365D78}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linkup.Common", "Linkup.Common\Linkup.Common.csproj", "{79D0347A-7F1D-4AF4-B013-3B6FA12E066C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linkup.DataRelationalMapping", "Linkup.DataRelationalMapping\Linkup.DataRelationalMapping.csproj", "{E3217E3E-19AD-4AE1-AD3C-1D9F6A0BA50B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Linkup.Data", "Linkup.Data\Linkup.Data.csproj", "{75901595-6F1A-4101-8909-59FDF89168DB}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{405C21F4-E46A-4FCA-A8FE-BDEF9EC130B8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{405C21F4-E46A-4FCA-A8FE-BDEF9EC130B8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{405C21F4-E46A-4FCA-A8FE-BDEF9EC130B8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{405C21F4-E46A-4FCA-A8FE-BDEF9EC130B8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A6DD850-1725-4238-B03D-EC94A87C392E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A6DD850-1725-4238-B03D-EC94A87C392E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A6DD850-1725-4238-B03D-EC94A87C392E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A6DD850-1725-4238-B03D-EC94A87C392E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{04F9D0B8-3CB4-47E5-A325-262C33365D78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{04F9D0B8-3CB4-47E5-A325-262C33365D78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{04F9D0B8-3CB4-47E5-A325-262C33365D78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{04F9D0B8-3CB4-47E5-A325-262C33365D78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79D0347A-7F1D-4AF4-B013-3B6FA12E066C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79D0347A-7F1D-4AF4-B013-3B6FA12E066C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79D0347A-7F1D-4AF4-B013-3B6FA12E066C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79D0347A-7F1D-4AF4-B013-3B6FA12E066C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3217E3E-19AD-4AE1-AD3C-1D9F6A0BA50B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3217E3E-19AD-4AE1-AD3C-1D9F6A0BA50B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3217E3E-19AD-4AE1-AD3C-1D9F6A0BA50B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3217E3E-19AD-4AE1-AD3C-1D9F6A0BA50B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{75901595-6F1A-4101-8909-59FDF89168DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{75901595-6F1A-4101-8909-59FDF89168DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{75901595-6F1A-4101-8909-59FDF89168DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{75901595-6F1A-4101-8909-59FDF89168DB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection

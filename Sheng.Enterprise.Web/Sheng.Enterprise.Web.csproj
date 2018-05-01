@@ -1,0 +1,416 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
+  <Import Project="..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{04F9D0B8-3CB4-47E5-A325-262C33365D78}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Sheng.Enterprise.Web</RootNamespace>
+    <AssemblyName>Sheng.Enterprise.Web</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <UseGlobalApplicationHostFile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <WebGreaseLibPath>..\packages\WebGrease.1.5.2\lib</WebGreaseLibPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.4.1.9004, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Antlr.3.4.1.9004\lib\Antlr3.Runtime.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="WebGrease, Version=1.5.2.14234, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebGrease.1.5.2\lib\WebGrease.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Web.Razor">
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Webpages">
+      <HintPath>..\packages\Microsoft.AspNet.Webpages.3.2.3\lib\net45\System.Web.Webpages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Webpages.Deployment">
+      <HintPath>..\packages\Microsoft.AspNet.Webpages.3.2.3\lib\net45\System.Web.Webpages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Webpages.Razor">
+      <HintPath>..\packages\Microsoft.AspNet.Webpages.3.2.3\lib\net45\System.Web.Webpages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Helpers">
+      <HintPath>..\packages\Microsoft.AspNet.Webpages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure">
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc">
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.3\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\bootstrap.css" />
+    <Content Include="Content\bootstrap.min.css" />
+    <Content Include="Content\Login.css" />
+    <Content Include="Content\Site.css" />
+    <Content Include="Content\Style.css" />
+    <Content Include="Content\WeeklyReport.css" />
+    <Content Include="Content\zTreeStyle\img\diy\1_close.png" />
+    <Content Include="Content\zTreeStyle\img\diy\1_open.png" />
+    <Content Include="Content\zTreeStyle\img\diy\2.png" />
+    <Content Include="Content\zTreeStyle\img\diy\3.png" />
+    <Content Include="Content\zTreeStyle\img\diy\4.png" />
+    <Content Include="Content\zTreeStyle\img\diy\5.png" />
+    <Content Include="Content\zTreeStyle\img\diy\6.png" />
+    <Content Include="Content\zTreeStyle\img\diy\7.png" />
+    <Content Include="Content\zTreeStyle\img\diy\8.png" />
+    <Content Include="Content\zTreeStyle\img\diy\9.png" />
+    <Content Include="Content\zTreeStyle\img\line_conn.gif" />
+    <Content Include="Content\zTreeStyle\img\loading.gif" />
+    <Content Include="Content\zTreeStyle\img\zTreeStandard.gif" />
+    <Content Include="Content\zTreeStyle\img\zTreeStandard.png" />
+    <Content Include="Content\zTreeStyle\zTreeStyle.css" />
+    <Content Include="favicon.ico" />
+    <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Global.asax" />
+    <Content Include="Images\dot.png" />
+    <Content Include="Images\leftMenuItem_active_bg.jpg" />
+    <Content Include="Images\leftMenu_bg.jpg" />
+    <Content Include="Images\leftTitle_bg.jpg" />
+    <Content Include="Images\loginBg.jpg" />
+    <Content Include="Images\topbar_bg.jpg" />
+    <Content Include="Scripts\bootstrap.js" />
+    <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="Scripts\common.js" />
+    <Content Include="Scripts\jquery-1.10.2.js" />
+    <Content Include="Scripts\jquery-1.10.2.min.js" />
+    <Content Include="Scripts\jquery.validate.js" />
+    <Content Include="Scripts\jquery.validate.min.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.js" />
+    <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
+    <Content Include="Scripts\json2.js" />
+    <Content Include="Scripts\laydate\laydate.js" />
+    <Content Include="Scripts\laydate\need\laydate.css" />
+    <Content Include="Scripts\laydate\skins\dahong\icon.png" />
+    <Content Include="Scripts\laydate\skins\dahong\laydate.css" />
+    <Content Include="Scripts\laydate\skins\default\icon.png" />
+    <Content Include="Scripts\laydate\skins\default\laydate.css" />
+    <Content Include="Scripts\laydate\skins\molv\icon.png" />
+    <Content Include="Scripts\laydate\skins\molv\laydate.css" />
+    <Content Include="Scripts\layer\extend\layer.ext.js" />
+    <Content Include="Scripts\layer\layer.js" />
+    <Content Include="Scripts\layer\skin\default\icon-ext.png" />
+    <Content Include="Scripts\layer\skin\default\icon.png" />
+    <Content Include="Scripts\layer\skin\default\loading-0.gif" />
+    <Content Include="Scripts\layer\skin\default\loading-1.gif" />
+    <Content Include="Scripts\layer\skin\default\loading-2.gif" />
+    <Content Include="Scripts\layer\skin\espresso\close.png" />
+    <Content Include="Scripts\layer\skin\espresso\icon.png" />
+    <Content Include="Scripts\layer\skin\espresso\style.css" />
+    <Content Include="Scripts\layer\skin\layer.css" />
+    <Content Include="Scripts\layer\skin\layer.ext.css" />
+    <Content Include="Scripts\laypage\laypage.js" />
+    <Content Include="Scripts\laypage\skin\laypage.css" />
+    <Content Include="Scripts\laytpl.js" />
+    <Content Include="Scripts\MD5.js" />
+    <Content Include="Scripts\modernizr-2.6.2.js" />
+    <Content Include="Scripts\respond.js" />
+    <Content Include="Scripts\respond.min.js" />
+    <Content Include="Scripts\validate\additional-methods.js" />
+    <Content Include="Scripts\validate\additional-methods.min.js" />
+    <Content Include="Scripts\validate\jquery.validate.js" />
+    <Content Include="Scripts\validate\jquery.validate.min.js" />
+    <Content Include="Scripts\validate\localization\messages_ar.js" />
+    <Content Include="Scripts\validate\localization\messages_ar.min.js" />
+    <Content Include="Scripts\validate\localization\messages_bg.js" />
+    <Content Include="Scripts\validate\localization\messages_bg.min.js" />
+    <Content Include="Scripts\validate\localization\messages_bn_BD.js" />
+    <Content Include="Scripts\validate\localization\messages_bn_BD.min.js" />
+    <Content Include="Scripts\validate\localization\messages_ca.js" />
+    <Content Include="Scripts\validate\localization\messages_ca.min.js" />
+    <Content Include="Scripts\validate\localization\messages_cs.js" />
+    <Content Include="Scripts\validate\localization\messages_cs.min.js" />
+    <Content Include="Scripts\validate\localization\messages_da.js" />
+    <Content Include="Scripts\validate\localization\messages_da.min.js" />
+    <Content Include="Scripts\validate\localization\messages_de.js" />
+    <Content Include="Scripts\validate\localization\messages_de.min.js" />
+    <Content Include="Scripts\validate\localization\messages_el.js" />
+    <Content Include="Scripts\validate\localization\messages_el.min.js" />
+    <Content Include="Scripts\validate\localization\messages_es.js" />
+    <Content Include="Scripts\validate\localization\messages_es.min.js" />
+    <Content Include="Scripts\validate\localization\messages_es_AR.js" />
+    <Content Include="Scripts\validate\localization\messages_es_AR.min.js" />
+    <Content Include="Scripts\validate\localization\messages_es_PE.js" />
+    <Content Include="Scripts\validate\localization\messages_es_PE.min.js" />
+    <Content Include="Scripts\validate\localization\messages_et.js" />
+    <Content Include="Scripts\validate\localization\messages_et.min.js" />
+    <Content Include="Scripts\validate\localization\messages_eu.js" />
+    <Content Include="Scripts\validate\localization\messages_eu.min.js" />
+    <Content Include="Scripts\validate\localization\messages_fa.js" />
+    <Content Include="Scripts\validate\localization\messages_fa.min.js" />
+    <Content Include="Scripts\validate\localization\messages_fi.js" />
+    <Content Include="Scripts\validate\localization\messages_fi.min.js" />
+    <Content Include="Scripts\validate\localization\messages_fr.js" />
+    <Content Include="Scripts\validate\localization\messages_fr.min.js" />
+    <Content Include="Scripts\validate\localization\messages_ge.js" />
+    <Content Include="Scripts\validate\localization\messages_ge.min.js" />
+    <Content Include="Scripts\validate\localization\messages_gl.js" />
+    <Content Include="Scripts\validate\localization\messages_gl.min.js" />
+    <Content Include="Scripts\validate\localization\messages_he.js" />
+    <Content Include="Scripts\validate\localization\messages_he.min.js" />
+    <Content Include="Scripts\validate\localization\messages_hr.js" />
+    <Content Include="Scripts\validate\localization\messages_hr.min.js" />
+    <Content Include="Scripts\validate\localization\messages_hu.js" />
+    <Content Include="Scripts\validate\localization\messages_hu.min.js" />
+    <Content Include="Scripts\validate\localization\messages_hy_AM.js" />
+    <Content Include="Scripts\validate\localization\messages_hy_AM.min.js" />
+    <Content Include="Scripts\validate\localization\messages_id.js" />
+    <Content Include="Scripts\validate\localization\messages_id.min.js" />
+    <Content Include="Scripts\validate\localization\messages_is.js" />
+    <Content Include="Scripts\validate\localization\messages_is.min.js" />
+    <Content Include="Scripts\validate\localization\messages_it.js" />
+    <Content Include="Scripts\validate\localization\messages_it.min.js" />
+    <Content Include="Scripts\validate\localization\messages_ja.js" />
+    <Content Include="Scripts\validate\localization\messages_ja.min.js" />
+    <Content Include="Scripts\validate\localization\messages_ka.js" />
+    <Content Include="Scripts\validate\localization\messages_ka.min.js" />
+    <Content Include="Scripts\validate\localization\messages_kk.js" />
+    <Content Include="Scripts\validate\localization\messages_kk.min.js" />
+    <Content Include="Scripts\validate\localization\messages_ko.js" />
+    <Content Include="Scripts\validate\localization\messages_ko.min.js" />
+    <Content Include="Scripts\validate\localization\messages_lt.js" />
+    <Content Include="Scripts\validate\localization\messages_lt.min.js" />
+    <Content Include="Scripts\validate\localization\messages_lv.js" />
+    <Content Include="Scripts\validate\localization\messages_lv.min.js" />
+    <Content Include="Scripts\validate\localization\messages_my.js" />
+    <Content Include="Scripts\validate\localization\messages_my.min.js" />
+    <Content Include="Scripts\validate\localization\messages_nl.js" />
+    <Content Include="Scripts\validate\localization\messages_nl.min.js" />
+    <Content Include="Scripts\validate\localization\messages_no.js" />
+    <Content Include="Scripts\validate\localization\messages_no.min.js" />
+    <Content Include="Scripts\validate\localization\messages_pl.js" />
+    <Content Include="Scripts\validate\localization\messages_pl.min.js" />
+    <Content Include="Scripts\validate\localization\messages_pt_BR.js" />
+    <Content Include="Scripts\validate\localization\messages_pt_BR.min.js" />
+    <Content Include="Scripts\validate\localization\messages_pt_PT.js" />
+    <Content Include="Scripts\validate\localization\messages_pt_PT.min.js" />
+    <Content Include="Scripts\validate\localization\messages_ro.js" />
+    <Content Include="Scripts\validate\localization\messages_ro.min.js" />
+    <Content Include="Scripts\validate\localization\messages_ru.js" />
+    <Content Include="Scripts\validate\localization\messages_ru.min.js" />
+    <Content Include="Scripts\validate\localization\messages_si.js" />
+    <Content Include="Scripts\validate\localization\messages_si.min.js" />
+    <Content Include="Scripts\validate\localization\messages_sk.js" />
+    <Content Include="Scripts\validate\localization\messages_sk.min.js" />
+    <Content Include="Scripts\validate\localization\messages_sl.js" />
+    <Content Include="Scripts\validate\localization\messages_sl.min.js" />
+    <Content Include="Scripts\validate\localization\messages_sr.js" />
+    <Content Include="Scripts\validate\localization\messages_sr.min.js" />
+    <Content Include="Scripts\validate\localization\messages_sr_lat.js" />
+    <Content Include="Scripts\validate\localization\messages_sr_lat.min.js" />
+    <Content Include="Scripts\validate\localization\messages_sv.js" />
+    <Content Include="Scripts\validate\localization\messages_sv.min.js" />
+    <Content Include="Scripts\validate\localization\messages_th.js" />
+    <Content Include="Scripts\validate\localization\messages_th.min.js" />
+    <Content Include="Scripts\validate\localization\messages_tj.js" />
+    <Content Include="Scripts\validate\localization\messages_tj.min.js" />
+    <Content Include="Scripts\validate\localization\messages_tr.js" />
+    <Content Include="Scripts\validate\localization\messages_tr.min.js" />
+    <Content Include="Scripts\validate\localization\messages_uk.js" />
+    <Content Include="Scripts\validate\localization\messages_uk.min.js" />
+    <Content Include="Scripts\validate\localization\messages_vi.js" />
+    <Content Include="Scripts\validate\localization\messages_vi.min.js" />
+    <Content Include="Scripts\validate\localization\messages_zh.js" />
+    <Content Include="Scripts\validate\localization\messages_zh.min.js" />
+    <Content Include="Scripts\validate\localization\messages_zh_TW.js" />
+    <Content Include="Scripts\validate\localization\messages_zh_TW.min.js" />
+    <Content Include="Scripts\validate\localization\methods_de.js" />
+    <Content Include="Scripts\validate\localization\methods_de.min.js" />
+    <Content Include="Scripts\validate\localization\methods_es_CL.js" />
+    <Content Include="Scripts\validate\localization\methods_es_CL.min.js" />
+    <Content Include="Scripts\validate\localization\methods_fi.js" />
+    <Content Include="Scripts\validate\localization\methods_fi.min.js" />
+    <Content Include="Scripts\validate\localization\methods_nl.js" />
+    <Content Include="Scripts\validate\localization\methods_nl.min.js" />
+    <Content Include="Scripts\validate\localization\methods_pt.js" />
+    <Content Include="Scripts\validate\localization\methods_pt.min.js" />
+    <Content Include="Scripts\ztree\jquery.ztree.all-3.5.min.js" />
+    <Content Include="Scripts\ztree\jquery.ztree.core-3.5.min.js" />
+    <Content Include="Areas\Api\Views\web.config" />
+    <None Include="Scripts\_references.js" />
+    <Content Include="Web.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\BundleConfig.cs" />
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Areas\Api\ApiAreaRegistration.cs" />
+    <Compile Include="Areas\Api\Controllers\DomainController.cs" />
+    <Compile Include="Areas\Api\Controllers\SettingsController.cs" />
+    <Compile Include="Areas\Api\Controllers\UserContextController.cs" />
+    <Compile Include="Areas\Api\Controllers\UserController.cs" />
+    <Compile Include="Areas\Api\Controllers\WeeklyReportController.cs" />
+    <Compile Include="Controllers\EnterpriseController.cs" />
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\SettingsController.cs" />
+    <Compile Include="Controllers\UnityController.cs" />
+    <Compile Include="Controllers\WeeklyReportController.cs" />
+    <Compile Include="Filters\AllowedAnonymous.cs" />
+    <Compile Include="Filters\AuthorizationFilter.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\AuthorizationHelper.cs" />
+    <Compile Include="Helpers\ExcelHelper.cs" />
+    <Compile Include="Helpers\SessionContainer.cs" />
+    <Compile Include="Models\LoginViewModel.cs" />
+    <Compile Include="Models\RegisterViewModel.cs" />
+    <Compile Include="Models\Settings\CheckRelationViewModel.cs" />
+    <Compile Include="Models\Settings\JobLevelViewModel.cs" />
+    <Compile Include="Models\Settings\JobTitleViewModel.cs" />
+    <Compile Include="Models\Settings\OfficeLocationViewModel.cs" />
+    <Compile Include="Models\Settings\OrganizationalStructureViewModel.cs" />
+    <Compile Include="Models\Settings\OrganizationViewModel.cs" />
+    <Compile Include="Models\Settings\PostViewModel.cs" />
+    <Compile Include="Models\Settings\RoleViewModel.cs" />
+    <Compile Include="Models\Settings\UserDetailViewModel.cs" />
+    <Compile Include="Models\Settings\UserViewModel.cs" />
+    <Compile Include="Models\Settings\WorkStatusViewModel.cs" />
+    <Compile Include="Models\Settings\WorkTypeViewModel.cs" />
+    <Compile Include="Models\WeeklyReport\CheckViewModel.cs" />
+    <Compile Include="Models\WeeklyReport\ReportByOrganizationViewModel.cs" />
+    <Compile Include="Models\WeeklyReport\ReportBySubmitViewModel.cs" />
+    <Compile Include="Models\WeeklyReport\SearchByOrganizationViewModel.cs" />
+    <Compile Include="Models\WeeklyReport\SearchByPersonalViewModel.cs" />
+    <Compile Include="Models\WeeklyReport\SearchByWorkTypeViewModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\web.config" />
+    <Content Include="packages.config" />
+    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Scripts\jquery-1.10.2.min.map" />
+    <Content Include="template.xls" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="App_Code\" />
+    <Folder Include="App_Data\" />
+    <Folder Include="Areas\Api\Models\" />
+    <Folder Include="Areas\Api\Views\Shared\" />
+    <Folder Include="ExcelExport\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Linkup.Common\Linkup.Common.csproj">
+      <Project>{79d0347a-7f1d-4af4-b013-3b6fa12e066c}</Project>
+      <Name>Linkup.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Sheng.Enterprise.Core\Sheng.Enterprise.Core.csproj">
+      <Project>{405c21f4-e46a-4fca-a8fe-bdef9ec130b8}</Project>
+      <Name>Sheng.Enterprise.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>21658</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:21658/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+  </Target>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
