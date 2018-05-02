@@ -36,7 +36,7 @@
 
         loadUser();
 
-        _edit = "@(Model.User != null)" == "True";
+        _edit = "@(Model.User != null)" === "True";
 
         if (_edit) {
             $("#spanMessage").html("");
@@ -96,7 +96,7 @@
     }
 
     function save() {
-        if (_validator.form() == false) {
+        if (_validator.form() === false) {
             layerInputAlertMsg();
             return;
         }
@@ -127,7 +127,7 @@
 
         var apiUrl = "/Api/User/Update";
 
-        if (_edit == false) {
+        if (_edit === false) {
             apiUrl = "/Api/User/Create";
         }
 
@@ -242,7 +242,7 @@
 <div id="divContent">
     <div id="divContainerTitle">人员</div>
     <form id="formUser">
-        <div style=" position:absolute; top:70px; bottom:0px;left:20px;right:20px;OVERFLOW-Y: auto;">
+        <div style="position:absolute; top:70px; bottom:0px;left:20px;right:20px;OVERFLOW-Y: auto;">
             <input type="hidden" id="txtId" />
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
@@ -268,7 +268,7 @@
                 <tr>
                     <td height="50">部门：</td>
                     <td>
-                        @Helpers.OrganizationSelector("organizationSelector", null, null, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name)
+                        @CustomerHelper.OrganizationSelector("organizationSelector", null, null, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name)
                     </td>
                 </tr>
                 <tr>

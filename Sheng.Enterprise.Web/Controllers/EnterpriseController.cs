@@ -36,6 +36,12 @@ namespace Sheng.Enterprise.Web
                 list.Add(num.ToString());
                 num++;
             } while (num <= year);
+
+            ViewBag.UserContext = this.UserContext;
+            ViewBag.RootOrganization = this.UserContext.RootOrganization;
+            ViewBag.User = this.UserContext.User;
+            ViewBag.Domain = this.UserContext.Domain;
+            ViewBag.YearList = list;
         }
 
         protected T RequestArgs<T>() where T : class

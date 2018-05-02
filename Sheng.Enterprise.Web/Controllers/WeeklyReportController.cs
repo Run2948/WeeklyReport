@@ -18,6 +18,7 @@ namespace Sheng.Enterprise.Web.Controllers
 
 		private static readonly DomainManager _domainManager = DomainManager.Instance;
 
+
 		public ActionResult Index()
 		{
 			return View();
@@ -121,7 +122,9 @@ namespace Sheng.Enterprise.Web.Controllers
 					}
 				}
 			}
-			return View(postViewModel);
+
+		    ViewBag.CurrentWeekOfYear = postViewModel.CurrentWeekOfYear;
+            return View(postViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_SearchByOrganization")]
@@ -172,7 +175,10 @@ namespace Sheng.Enterprise.Web.Controllers
 			searchByOrganizationViewModel.Month = month;
 			searchByOrganizationViewModel.WeekOfYear = weekOfYear2;
 			searchByOrganizationViewModel.WeeklyReportList = _weeklyReportManager.GetWeeklyReportListByOrganization(UserContext.Domain.Id, searchByOrganizationViewModel.OrganizationId, year, weekOfYear2);
-			return View(searchByOrganizationViewModel);
+
+		    ViewBag.CurrentWeekOfYear = searchByOrganizationViewModel.CurrentWeekOfYear;
+
+            return View(searchByOrganizationViewModel);
 		}
 
 		public ActionResult SearchByPersonal()
@@ -220,7 +226,10 @@ namespace Sheng.Enterprise.Web.Controllers
 			int weekOfYear = DateTimeHelper.GetWeekOfYear(DateTime.Now);
 			searchByPersonalViewModel.CurrentWeekOfYear = weekOfYear;
 			searchByPersonalViewModel.WeeklyReportList = _weeklyReportManager.GetWeeklyReportListByPerson(searchByPersonalViewModel.UserId, year, month, year2, month2);
-			return View(searchByPersonalViewModel);
+
+		    ViewBag.CurrentWeekOfYear = searchByPersonalViewModel.CurrentWeekOfYear;
+
+            return View(searchByPersonalViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_SearchByWorkType")]
@@ -276,7 +285,10 @@ namespace Sheng.Enterprise.Web.Controllers
 			{
 				searchByWorkTypeViewModel.WeeklyReportList = new List<WeeklyReport>();
 			}
-			return View(searchByWorkTypeViewModel);
+
+		    ViewBag.CurrentWeekOfYear = searchByWorkTypeViewModel.CurrentWeekOfYear;
+
+            return View(searchByWorkTypeViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_Check")]
@@ -313,7 +325,10 @@ namespace Sheng.Enterprise.Web.Controllers
 				checkViewModel.CheckViewType = checkViewType;
 			}
 			checkViewModel.WeeklyReportList = _weeklyReportManager.GetWeeklyReportListForCheck(UserContext.Domain.Id, UserContext.User.Id, year, weekOfYear2, checkViewModel.CheckViewType);
-			return View(checkViewModel);
+
+		    ViewBag.CurrentWeekOfYear = checkViewModel.CurrentWeekOfYear;
+
+            return View(checkViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_ReportByOrganization")]
@@ -369,7 +384,10 @@ namespace Sheng.Enterprise.Web.Controllers
 			reportByOrganizationViewModel.EndYear = year2;
 			reportByOrganizationViewModel.EndMonth = month2;
 			reportByOrganizationViewModel.Data = _weeklyReportManager.ReportByOrganization(UserContext.Domain.Id, reportByOrganizationViewModel.OrganizationId, year, month, year2, month2);
-			return View(reportByOrganizationViewModel);
+
+		    ViewBag.CurrentWeekOfYear = DateTimeHelper.GetWeekOfYear(DateTime.Now);
+
+            return View(reportByOrganizationViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_ReportBySubmit")]
@@ -420,7 +438,10 @@ namespace Sheng.Enterprise.Web.Controllers
 			reportBySubmitViewModel.Month = month;
 			reportBySubmitViewModel.WeekOfYear = weekOfYear2;
 			reportBySubmitViewModel.Data = _weeklyReportManager.ReportBySumbit(UserContext.Domain.Id, reportBySubmitViewModel.OrganizationId, year, weekOfYear2);
-			return View(reportBySubmitViewModel);
+
+		    ViewBag.CurrentWeekOfYear = reportBySubmitViewModel.CurrentWeekOfYear;
+
+            return View(reportBySubmitViewModel);
 		}
 	}
 }

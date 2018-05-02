@@ -144,7 +144,7 @@
 </script>
 
 <div style="margin-right:20px;margin-bottom:20px;">
-    @Helpers.TitleWithDate("查询", this.ViewBag)
+    @CustomerHelper.TitleWithDate("查询", this.ViewBag)
     <div style="margin-top:20px">
         <table width="100%" border="0" cellspacing="0" cellpadding="0">
             <tr>
@@ -173,11 +173,11 @@
         <div style="float:left; margin-left:20px;">
             @if (AuthorizationHelper.Verify("WeeklyReport_SearchByAllOrganization", HttpContext.Current))
             {
-                @Helpers.OrganizationSelector("organizationSelector", null, null, Model.OrganizationId, Model.OrganizationName)
+                @CustomerHelper.OrganizationSelector("organizationSelector", null, null, Model.OrganizationId, Model.OrganizationName)
             }
             else
             {
-                @Helpers.OrganizationSelector("organizationSelector", null, null, Model.OrganizationId, Model.OrganizationName, false)
+                @CustomerHelper.OrganizationSelector("organizationSelector", null, null, Model.OrganizationId, Model.OrganizationName, false)
             }
         </div>
         <div style="float:left; line-height:34px;margin-left:20px;">

@@ -186,7 +186,9 @@
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
     <Content Include="Scripts\common.js" />
-    <Content Include="App_Code\Helpers.cshtml" />
+    <EmbeddedResource Include="App_Code\Helpers.cshtml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -348,6 +350,7 @@
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="App_Code\CustomerHelper.cs" />
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
@@ -406,7 +409,6 @@
     <Content Include="Views\Home\Login.cshtml" />
     <Content Include="Views\Home\Register.cshtml" />
     <Content Include="Views\Home\ResetPassword.cshtml" />
-    <Content Include="Views\Home\_LeftMenu.cshtml" />
     <Content Include="Views\Settings\CheckRelation.cshtml" />
     <Content Include="Views\Settings\Feedback.cshtml" />
     <Content Include="Views\Settings\Index.cshtml" />
@@ -440,7 +442,7 @@
     <Content Include="Views\WeeklyReport\SearchByOrganization.cshtml" />
     <Content Include="Views\WeeklyReport\SearchByPersonal.cshtml" />
     <Content Include="Views\WeeklyReport\SearchByWorkType.cshtml" />
-    <Content Include="Views\WeeklyReport\_LeftMenu.cshtml" />
+    <Content Include="Views\Shared\_LeftMenu.cshtml" />
     <Content Include="Views\_ViewStart.cshtml" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>

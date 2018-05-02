@@ -44,7 +44,7 @@
 </script>
 
     <div style="margin-right:20px; margin-bottom:20px;">
-        @Helpers.TitleWithDate("统计", this.ViewBag)
+        @CustomerHelper.TitleWithDate("统计", this.ViewBag)
         <div style="margin-top:20px">
             <table width="100%" border="0" cellspacing="0" cellpadding="0">
                 <tr>
@@ -68,7 +68,7 @@
                 组织架构：
             </div>
             <div style="float:left; margin-left:20px;">
-                @Helpers.OrganizationSelector("organizationSelector", null, null, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name)
+                @CustomerHelper.OrganizationSelector("organizationSelector", null, null, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name)
             </div>
         </div>
 
