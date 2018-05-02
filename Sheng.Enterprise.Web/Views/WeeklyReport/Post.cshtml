@@ -80,11 +80,11 @@
         @*$("#txtTime_" + _rowIndex).val('@item.Time');*@
         @if (item.Date.HasValue) {
           @:$("#txtDate_" + _rowIndex).val('@item.Date.Value.ToString("yyyy-MM-dd")');
-                                }
+        }
         else
         {
             @:$("#txtDate_" + _rowIndex).val('');
-                        }
+        }
         @*$("#txtRemark_" + _rowIndex).val('@item.Remark');*@
         @*$("#txtRemark_" + _rowIndex).val('@Html.Raw(item.Remark.Replace("<br/>", "\\n"))');  //*@
         $("#selectWorkStatus_" + _rowIndex).val('@item.Status');
@@ -184,11 +184,10 @@
 
         loadWorkTaskList(_rowIndex);
 
-        $('#selectWorkType_' + _rowIndex).change(function ()
-        {
+        $('#selectWorkType_' + _rowIndex).change(function() {
             var rowIndex = $(this).attr("id").split("_")[1];
             loadWorkTaskList(rowIndex);
-        })
+        });
 
         $("#selectWorkTask_" + _rowIndex).rules("add", {
             required: true,
@@ -478,7 +477,7 @@
 
 </script>
 
-@CustomerHelper.TitleWithDate("填写", this.ViewBag)
+@Helpers.TitleWithDate("填写", this.ViewBag)
 <div style="margin-top: 20px; height: 50px; background: #D8E6ED">
     <div style="float: left; margin-left: 20px; margin-right: 20px">
         <table border="0" cellspacing="0" cellpadding="0" height="50">

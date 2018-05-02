@@ -1,4 +1,5 @@
-﻿@helper HelperName(string name) {
+﻿
+@helper HelperName(string name) {
     // 你的帮助程序可以包含代码和/或标记，例如
     // var msg = "你好 " + name;
     // <p>@msg</p>
@@ -6,19 +7,131 @@
 }
 
 
-@helper OrganizationSelector(string domId, string id, string name, Guid domainId, string domainName, bool chooseButton = true)
-{
-    @name
-}
+@functions{
 
-@helper TitleWithDate(string title,dynamic viewBag)
-{
-    @title
-}
+    public static HelperResult OrganizationSelector(string domId, string id, string name, Guid domainId, string domainName, bool chooseButton = true)
+    {
+        return new HelperResult(x =>
+        {
+            WriteLiteralTo(x, "    <div");
+            WriteLiteralTo(x, " style=\"border:1px solid #BBBBBB;width:356px; height:32px; padding-left:6px;\"");
+            WriteLiteralTo(x, ">\n        <input");
+            WriteLiteralTo(x, " type=\"hidden\"");
+            WriteAttributeTo(x, "id", Tuple.Create(" id=\"", 245), Tuple.Create("\"", 256), Tuple.Create(Tuple.Create("", 250), Tuple.Create<object, int>(domId, 250), false));
+            WriteAttributeTo(x, "value", Tuple.Create(" value=\"", 257), Tuple.Create("\"", 268), Tuple.Create(Tuple.Create("", 265), Tuple.Create<object, int>(id, 265), false));
+            WriteLiteralTo(x, " />\n        <span");
+            WriteLiteralTo(x, " style=\"line-height:32px;\"");
+            WriteAttributeTo(x, "id", Tuple.Create(" id=\"", 312), Tuple.Create("\"", 328), Tuple.Create(Tuple.Create("", 317), Tuple.Create("span_", 317), true), Tuple.Create(Tuple.Create("", 322), Tuple.Create<object, int>(domId, 322), false));
+            WriteLiteralTo(x, ">");
+            WriteTo(x, name);
+            WriteLiteralTo(x, "</span>\n");
+            if (chooseButton)
+            {
+                WriteLiteralTo(x, "            <div");
+                WriteLiteralTo(x, " style=\"float:right;height:30px;\"");
+                WriteLiteralTo(x, ">\n                <table");
+                WriteLiteralTo(x, " height=\"32\"");
+                WriteLiteralTo(x, " border=\"0\"");
+                WriteLiteralTo(x, " cellpadding=\"0\"");
+                WriteLiteralTo(x, " cellspacing=\"0\"");
+                WriteLiteralTo(x, ">\n                    <tr>\n                        <td");
+                WriteLiteralTo(x, " valign=\"middle\"");
+                WriteLiteralTo(x, ">\n                            <input");
+                WriteLiteralTo(x, " type=\"button\"");
+                WriteLiteralTo(x, " style=\"margin-right:5px\"");
+                WriteLiteralTo(x, " value=\"选择\"");
+                WriteAttributeTo(x, "onclick", Tuple.Create(" onclick=\"", 664), Tuple.Create("\"", 702), Tuple.Create(Tuple.Create("", 674), Tuple.Create("chooseOrganization('", 674), true), Tuple.Create(Tuple.Create("", 694), Tuple.Create<object, int>(domId, 694), false), Tuple.Create(Tuple.Create("", 700), Tuple.Create("')", 700), true));
+                WriteLiteralTo(x, " />\n                        </td>\n                    </tr>\n                </table>\n            </div>\n");
+            }
+            WriteLiteralTo(x, "    </div>\n");
+            WriteLiteralTo(x, "    <script>\n\n        var _organizationSelectorLayerIndex_");
+            WriteTo(x, domId);
+            WriteLiteralTo(x, ";\n\n        function getSelectedOrganization(domId) {\n            return {\n                Id: $(\"#\" + domId).val(),\n                Name: $(\"#span_\" + domId).html()\n            };\n        }\n\n        function setSelectedOrganization(domId, id, name) {\n            $(\"#\" + domId).val(id);\n            $(\"#span_\" + domId).html(name);\n\n            $(\"#\" + domId).change();\n        }\n\n        function chooseOrganization(domId) {\n            _organizationSelectorLayerIndex_");
+            WriteTo(x, domId);
+            WriteLiteralTo(x, " = layer.open({\n                type: 2,\n                area: ['500px', '430px'], //宽高\n                closeBtn: false,\n                title: \"选择\",\n                shift: _layerShift,\n                content: '/Unity/OrganizationSelector?domId=' + domId\n            });\n        }\n\n        function selectOrganization(domId, id, name) {\n            $(\"#span_\" + domId).html(name);\n            $(\"#\" + domId).val(id);\n\n            layer.close(_organizationSelectorLayerIndex_");
+            WriteTo(x, domId);
+            WriteLiteralTo(x, ");\n            //layer.closeAll();\n\n            $(\"#\" + domId).change();\n        }\n\n\n    </script>\n");
+        });
+    }
 
-@helper PersonSelector(string domId, string id, string name, Guid domainId, string domainName, bool chooseButton = true)
-{
-    @name
-}
 
-@function
+    public static HelperResult PersonSelector(string domId, string id, string name, Guid domainId, string domainName, bool chooseButton = true)
+    {
+        return new HelperResult(x =>
+        {
+            WriteLiteralTo(x, "    <div");
+            WriteLiteralTo(x, " style=\"border:1px solid #BBBBBB;width:200px; height:32px; padding-left:6px;\"");
+            WriteLiteralTo(x, ">\n        <input");
+            WriteLiteralTo(x, " type=\"hidden\"");
+            WriteAttributeTo(x, "id", Tuple.Create(" id=\"", 2191), Tuple.Create("\"", 2202), Tuple.Create(Tuple.Create("", 2196), Tuple.Create<object, int>(domId, 2196), false));
+            WriteAttributeTo(x, "value", Tuple.Create(" value=\"", 2203), Tuple.Create("\"", 2214), Tuple.Create(Tuple.Create("", 2211), Tuple.Create<object, int>(id, 2211), false));
+            WriteLiteralTo(x, " />\n        <span");
+            WriteLiteralTo(x, " style=\"line-height:32px;\"");
+            WriteAttributeTo(x, "id", Tuple.Create(" id=\"", 2258), Tuple.Create("\"", 2274), Tuple.Create(Tuple.Create("", 2263), Tuple.Create("span_", 2263), true), Tuple.Create(Tuple.Create("", 2268), Tuple.Create<object, int>(domId, 2268), false));
+            WriteLiteralTo(x, ">");
+            WriteTo(x, name);
+            WriteLiteralTo(x, "</span>\n");
+            if (chooseButton)
+            {
+                WriteLiteralTo(x, "            <div");
+                WriteLiteralTo(x, " style=\"float:right;height:30px;\"");
+                WriteLiteralTo(x, ">\n                <table");
+                WriteLiteralTo(x, " height=\"32\"");
+                WriteLiteralTo(x, " border=\"0\"");
+                WriteLiteralTo(x, " cellpadding=\"0\"");
+                WriteLiteralTo(x, " cellspacing=\"0\"");
+                WriteLiteralTo(x, ">\n                    <tr>\n                        <td");
+                WriteLiteralTo(x, " valign=\"middle\"");
+                WriteLiteralTo(x, ">\n                            <input");
+                WriteLiteralTo(x, " type=\"button\"");
+                WriteLiteralTo(x, " style=\"margin-right:5px\"");
+                WriteLiteralTo(x, " value=\"选择\"");
+                WriteAttributeTo(x, "onclick", Tuple.Create(" onclick=\"", 2610), Tuple.Create("\"", 2642), Tuple.Create(Tuple.Create("", 2620), Tuple.Create("choosePerson('", 2620), true), Tuple.Create(Tuple.Create("", 2634), Tuple.Create<object, int>(domId, 2634), false), Tuple.Create(Tuple.Create("", 2640), Tuple.Create("')", 2640), true));
+                WriteAttributeTo(x, "id", Tuple.Create(" id=\"", 2643), Tuple.Create("\"", 2667), Tuple.Create(Tuple.Create("", 2648), Tuple.Create("selectButton_", 2648), true), Tuple.Create(Tuple.Create("", 2661), Tuple.Create<object, int>(domId, 2661), false));
+                WriteLiteralTo(x, " />\n                        </td>\n                    </tr>\n                </table>\n            </div>\n");
+            }
+            WriteLiteralTo(x, "    </div>\n");
+            WriteLiteralTo(x, "    <script>\n\n        var _personSelectorLayerIndex_");
+            WriteTo(x, domId);
+            WriteLiteralTo(x, ";\n\n        function setPersonSelectorDisabled(domId)\n        {\n            $(\"#selectButton_\" + domId).hide();\n        }\n\n        function setPersonSelectorEnabled(domId)\n        {\n            $(\"#selectButton_\" + domId).show();\n        }\n\n        function getSelectedPerson(domId)\n        {\n            return {\n                Id: $(\"#\" + domId).val(),\n                Name: $(\"#span_\" + domId).html()\n            };\n        }\n\n        function setSelectedPerson(domId, id, name)\n        {\n            $(\"#\" + domId).val(id);\n            $(\"#span_\" + domId).html(name);\n\n            $(\"#\" + domId).change();\n        }\n\n        function choosePerson(domId)\n        {\n            _personSelectorLayerIndex_");
+            WriteTo(x, domId);
+            WriteLiteralTo(x, " = layer.open({\n                type: 2,\n                area: ['740px', '530px'], //宽高\n                closeBtn: false,\n                title: \"选择\",\n                shift: _layerShift,\n                content: '/Unity/PersonSelector?domId=' + domId\n            });\n        }\n\n\n        function selectPerson(domId, id, name)\n        {\n            $(\"#span_\" + domId).html(name);\n            $(\"#\" + domId).val(id);\n\n            layer.close(_personSelectorLayerIndex_");
+            WriteTo(x, domId);
+            WriteLiteralTo(x, ");\n            // layer.closeAll();\n\n            $(\"#\" + domId).change();\n        }\n\n    </script>\n");
+        });
+    }
+
+    public static HelperResult TitleWithDate(string title, dynamic viewBag)
+    {
+        return new HelperResult(x =>
+        {
+            WriteLiteralTo(x, "    <div");
+            WriteLiteralTo(x, " id=\"divContent\"");
+            WriteLiteralTo(x, ">\n        <div");
+            WriteLiteralTo(x, " id=\"divContainerTitle\"");
+            WriteLiteralTo(x, ">\n            <div");
+            WriteLiteralTo(x, " style=\" float:left;font-size:26px;\"");
+            WriteLiteralTo(x, ">\n");
+            WriteLiteralTo(x, "                ");
+            WriteTo(x, title);
+            WriteLiteralTo(x, "\n            </div>\n            <div");
+            WriteLiteralTo(x, " style=\" float:right\"");
+            WriteLiteralTo(x, ">\n                <div>\n                    <span");
+            WriteLiteralTo(x, " class=\"font_blue_18\"");
+            WriteLiteralTo(x, ">第 ");
+            WriteTo(x, viewBag.CurrentWeekOfYear);
+            WriteLiteralTo(x, " 周</span>\n                </div>\n                <div>\n                    <span");
+            WriteLiteralTo(x, " class=\"font_blue_18\"");
+            WriteLiteralTo(x, ">");
+            WriteTo(x, DateTime.Now.ToString("yyyy年M月d日"));
+            WriteLiteralTo(x, "</span>\n                    <span");
+            WriteLiteralTo(x, " class=\"font_blue_18\"");
+            WriteLiteralTo(x, ">");
+            WriteTo(x, DateTime.Now.ToString("dddd", new System.Globalization.CultureInfo("zh-cn")));
+            WriteLiteralTo(x, "</span>\n                </div>\n            </div>\n            <div");
+            WriteLiteralTo(x, " style=\"clear:both\"");
+            WriteLiteralTo(x, "></div>\n        </div>\n    </div>\n");
+        });
+    }
+
+}
