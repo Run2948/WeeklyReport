@@ -15,131 +15,134 @@ namespace Sheng.Enterprise.Web.Controllers
 
 		public ActionResult Index()
 		{
-			return base.View();
+			return View();
 		}
 
 		public ActionResult Password()
 		{
-			return base.View();
+			return View();
 		}
 
 		[AuthorizationFilter("Settings_Organization")]
 		public ActionResult Organization()
 		{
-			return base.View(new OrganizationViewModel
+			return View(new OrganizationViewModel
 			{
-				Domain = SettingsController._domainManager.GetDomain(base.UserContext.User.DomainId)
+				Domain = _domainManager.GetDomain(UserContext.User.DomainId)
 			});
 		}
 
 		[AuthorizationFilter("Settings_Organization")]
 		public ActionResult OrganizationalStructure()
 		{
-			return base.View(new OrganizationalStructureViewModel
+			return View(new OrganizationalStructureViewModel
 			{
-				Domain = SettingsController._domainManager.GetDomain(base.UserContext.User.DomainId),
-				OrganizationList = SettingsController._domainManager.GetOrganizationList(base.UserContext.User.DomainId)
+				Domain = _domainManager.GetDomain(UserContext.User.DomainId),
+				OrganizationList = _domainManager.GetOrganizationList(UserContext.User.DomainId)
 			});
 		}
 
 		[AuthorizationFilter("Settings_User")]
 		public new ActionResult User()
 		{
-			return base.View(new UserViewModel
+			return View(new UserViewModel
 			{
-				Domain = SettingsController._domainManager.GetDomain(base.UserContext.User.DomainId),
-				OrganizationList = SettingsController._domainManager.GetOrganizationList(base.UserContext.User.DomainId)
+				Domain = _domainManager.GetDomain(UserContext.User.DomainId),
+				OrganizationList = _domainManager.GetOrganizationList(UserContext.User.DomainId)
 			});
 		}
 
 		[AuthorizationFilter("Settings_User")]
 		public ActionResult UserDetail()
 		{
-			UserDetailViewModel userDetailViewModel = new UserDetailViewModel();
-			userDetailViewModel.JobTitleList = SettingsController._settingsManager.GetJobTitleList(base.UserContext.User.DomainId);
-			userDetailViewModel.JobLevelList = SettingsController._settingsManager.GetJobLevelList(base.UserContext.User.DomainId);
-			userDetailViewModel.OfficeLocationList = SettingsController._settingsManager.GetOfficeLocationList(base.UserContext.User.DomainId);
-			userDetailViewModel.WorkTypeList = SettingsController._settingsManager.GetWorkTypeList(base.UserContext.Domain.Id);
-			string text = base.Request.QueryString["id"];
+		    UserDetailViewModel userDetailViewModel =
+		        new UserDetailViewModel
+		        {
+		            JobTitleList = _settingsManager.GetJobTitleList(UserContext.User.DomainId),
+		            JobLevelList = _settingsManager.GetJobLevelList(UserContext.User.DomainId),
+		            OfficeLocationList = _settingsManager.GetOfficeLocationList(UserContext.User.DomainId),
+		            WorkTypeList = _settingsManager.GetWorkTypeList(UserContext.Domain.Id)
+		        };
+		    string text = Request.QueryString["id"];
 			Guid id;
 			if (!string.IsNullOrEmpty(text) && Guid.TryParse(text, out id))
 			{
-				userDetailViewModel.User = SettingsController._userManager.GetUserDataWrapper(id);
-				userDetailViewModel.UserWorkTypeList = SettingsController._userManager.GetUserWorkTypeList(id);
+				userDetailViewModel.User = _userManager.GetUserDataWrapper(id);
+				userDetailViewModel.UserWorkTypeList = _userManager.GetUserWorkTypeList(id);
 			}
-			return base.View(userDetailViewModel);
+			return View(userDetailViewModel);
 		}
 
 		[AuthorizationFilter("Settings_Role")]
 		public ActionResult Role()
 		{
-			return base.View(new RoleViewModel
+			return View(new RoleViewModel
 			{
-				RoleList = SettingsController._settingsManager.GetRoleList(base.UserContext.Domain.Id)
+				RoleList = _settingsManager.GetRoleList(UserContext.Domain.Id)
 			});
 		}
 
 		[AuthorizationFilter("Settings_BasalData")]
 		public ActionResult JobTitle()
 		{
-			return base.View(new JobTitleViewModel
+			return View(new JobTitleViewModel
 			{
-				Domain = SettingsController._domainManager.GetDomain(base.UserContext.User.DomainId),
-				JobTitleList = SettingsController._settingsManager.GetJobTitleList(base.UserContext.User.DomainId)
+				Domain = _domainManager.GetDomain(UserContext.User.DomainId),
+				JobTitleList = _settingsManager.GetJobTitleList(UserContext.User.DomainId)
 			});
 		}
 
 		[AuthorizationFilter("Settings_BasalData")]
 		public ActionResult JobLevel()
 		{
-			return base.View(new JobLevelViewModel
+			return View(new JobLevelViewModel
 			{
-				Domain = SettingsController._domainManager.GetDomain(base.UserContext.User.DomainId),
-				JobLevelList = SettingsController._settingsManager.GetJobLevelList(base.UserContext.User.DomainId)
+				Domain = _domainManager.GetDomain(UserContext.User.DomainId),
+				JobLevelList = _settingsManager.GetJobLevelList(UserContext.User.DomainId)
 			});
 		}
 
 		[AuthorizationFilter("Settings_BasalData")]
 		public ActionResult OfficeLocation()
 		{
-			return base.View(new OfficeLocationViewModel
+			return View(new OfficeLocationViewModel
 			{
-				Domain = SettingsController._domainManager.GetDomain(base.UserContext.User.DomainId),
-				OfficeLocationList = SettingsController._settingsManager.GetOfficeLocationList(base.UserContext.User.DomainId)
+				Domain = _domainManager.GetDomain(UserContext.User.DomainId),
+				OfficeLocationList = _settingsManager.GetOfficeLocationList(UserContext.User.DomainId)
 			});
 		}
 
 		[AuthorizationFilter("WeeklyReport_Settings")]
 		public ActionResult WorkType()
 		{
-			return base.View(new WorkTypeViewModel
+			return View(new WorkTypeViewModel
 			{
-				WorkTypeList = SettingsController._settingsManager.GetWorkTypeList(base.UserContext.User.DomainId),
-				WorkTaskList = SettingsController._settingsManager.GetWorkTaskList(base.UserContext.User.DomainId)
+				WorkTypeList = _settingsManager.GetWorkTypeList(UserContext.User.DomainId),
+				WorkTaskList = _settingsManager.GetWorkTaskList(UserContext.User.DomainId)
 			});
 		}
 
 		[AuthorizationFilter("WeeklyReport_Settings")]
 		public ActionResult WorkStatus()
 		{
-			return base.View(new WorkStatusViewModel
+			return View(new WorkStatusViewModel
 			{
-				WorkStatusList = SettingsController._settingsManager.GetWorkStatusList(base.UserContext.User.DomainId)
+				WorkStatusList = _settingsManager.GetWorkStatusList(UserContext.User.DomainId)
 			});
 		}
 
 		[AuthorizationFilter("WeeklyReport_Settings")]
 		public ActionResult CheckRelation()
 		{
-			return base.View(new CheckRelationViewModel
+			return View(new CheckRelationViewModel
 			{
-				CheckerWrapperList = SettingsController._settingsManager.GetCheckerWrapperList(base.UserContext.Domain.Id)
+				CheckerWrapperList = _settingsManager.GetCheckerWrapperList(UserContext.Domain.Id)
 			});
 		}
 
 		public ActionResult Feedback()
 		{
-			return base.View();
+			return View();
 		}
 	}
 }

@@ -13,54 +13,54 @@ namespace Sheng.Enterprise.Web.Areas.Api.Controllers
 		[HttpPost]
 		public ActionResult GetDomain()
 		{
-			Domain domain = this._domainManager.GetDomain(base.UserContext.User.DomainId);
-			return this.RespondDataResult(domain);
+			Domain domain = _domainManager.GetDomain(UserContext.User.DomainId);
+			return RespondDataResult(domain);
 		}
 
 		[HttpPost]
 		public ActionResult UpdateDomain()
 		{
-			Domain domain = base.RequestArgs<Domain>();
+			Domain domain = RequestArgs<Domain>();
 			if (domain == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
-			domain.Id = base.UserContext.User.DomainId;
-			this._domainManager.UpdateDomain(domain);
-			return this.RespondResult();
+			domain.Id = UserContext.User.DomainId;
+			_domainManager.UpdateDomain(domain);
+			return RespondResult();
 		}
 
 		[HttpPost]
 		public ActionResult GetOrganization()
 		{
-			string input = base.Request.QueryString["id"];
-			Organization organization = this._domainManager.GetOrganization(Guid.Parse(input));
-			return this.RespondDataResult(organization);
+			string input = Request.QueryString["id"];
+			Organization organization = _domainManager.GetOrganization(Guid.Parse(input));
+			return RespondDataResult(organization);
 		}
 
 		[HttpPost]
 		public ActionResult UpdateOrganization()
 		{
-			Organization organization = base.RequestArgs<Organization>();
+			Organization organization = RequestArgs<Organization>();
 			if (organization == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
-			this._domainManager.UpdateOrganization(organization);
-			return this.RespondResult();
+			_domainManager.UpdateOrganization(organization);
+			return RespondResult();
 		}
 
 		[HttpPost]
 		public ActionResult CreateOrganization()
 		{
-			Organization organization = base.RequestArgs<Organization>();
+			Organization organization = RequestArgs<Organization>();
 			if (organization == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
 			organization.Id = Guid.NewGuid();
-			this._domainManager.CreateOrganization(organization);
-			return this.RespondDataResult(new
+			_domainManager.CreateOrganization(organization);
+			return RespondDataResult(new
 			{
 				organization.Id
 			});
@@ -69,23 +69,23 @@ namespace Sheng.Enterprise.Web.Areas.Api.Controllers
 		[HttpPost]
 		public ActionResult RemoveOrganization()
 		{
-			string input = base.Request.QueryString["id"];
-			this._domainManager.RemoveOrganization(Guid.Parse(input));
-			return this.RespondResult();
+			string input = Request.QueryString["id"];
+			_domainManager.RemoveOrganization(Guid.Parse(input));
+			return RespondResult();
 		}
 
 		[HttpPost]
 		public ActionResult GetOrganizationList()
 		{
-			string input = base.Request.QueryString["domainId"];
-			List<Organization> organizationList = this._domainManager.GetOrganizationList(Guid.Parse(input));
-			return this.RespondDataResult(organizationList);
+			string input = Request.QueryString["domainId"];
+			List<Organization> organizationList = _domainManager.GetOrganizationList(Guid.Parse(input));
+			return RespondDataResult(organizationList);
 		}
 
 		public ActionResult MoveOrganization(Guid id, Guid id2)
 		{
-			this._domainManager.SwapSort(id, id2, "Organization");
-			return this.RespondResult();
+			_domainManager.SwapSort(id, id2, "Organization");
+			return RespondResult();
 		}
 	}
 }

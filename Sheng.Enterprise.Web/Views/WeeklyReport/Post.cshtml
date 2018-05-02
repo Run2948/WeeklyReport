@@ -1,0 +1,711 @@
+﻿@model Sheng.Enterprise.Web.Models.PostViewModel
+
+@{
+    ViewBag.Title = "填写";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "周 报";
+    ViewBag.MainMenu = "WeeklyReport";
+    ViewBag.LeftMenu = "Post";
+}
+
+<script src="~/Scripts/laydate/laydate.js"></script>
+
+<style>
+    .invalid {
+        color: red;
+        font-weight: normal;
+    }
+</style>
+
+<script>
+
+    var _rowIndex = 0;
+
+    var _weeklyReportId = "";
+
+    $(document).ready(function ()
+    {
+        @if (Model.WeeklyReport != null)
+         {
+             @:_weeklyReportId = '@Model.WeeklyReport.Id';
+                                                 }
+
+        $("#selectYear").val(@Model.Year);
+        $("#selectMonth").val(@Model.Month);
+
+        $('#selectYear').change(changeMonth);
+        $('#selectMonth').change(changeMonth);
+
+        $("#formLog").validate({
+            errorClass: "invalid"
+        });
+
+        //加载数据
+        loadWeeklyReport();
+
+        @if (Model.Notify && Model.AlertNotify)
+        {
+            <text>
+        layerAlert("您好，您在本周过去的时间内有未填写的总结，请填写。");
+        </text>
+            }
+
+        heartbeat();
+    });
+
+    function changeMonth(){
+        var year = $("#selectYear").val();
+        var month = $("#selectMonth").children('option:selected').val();
+        window.location.href = "/WeeklyReport/Post?year=" + year + "&month=" + month;
+    }
+
+    function loadWeeklyReport() {
+
+        @if (Model.WeeklyReport?.ItemList != null)
+        {
+            foreach (var item in Model.WeeklyReport.ItemList)
+            {
+                <text>
+        addWeekLog();
+
+        $("#txtOrganizationId_" + _rowIndex).val('@item.Organization');
+        $("#btnOrganization_" + _rowIndex).val('@item.OrganizationName');
+
+        $("#selectWorkType_" + _rowIndex).val('@item.WorkType');
+        //不触发selectProject_的change事件，原因不明
+        loadWorkTaskList(_rowIndex);
+        $("#selectWorkTask_" + _rowIndex).val('@item.WorkTask');
+        $("#txtContent_" + _rowIndex).val('@Html.Raw(item.Content.Replace("<br/>", "\\n"))');
+        @*$("#txtTime_" + _rowIndex).val('@item.Time');*@
+        @if (item.Date.HasValue) {
+          @:$("#txtDate_" + _rowIndex).val('@item.Date.Value.ToString("yyyy-MM-dd")');
+                                }
+        else
+        {
+            @:$("#txtDate_" + _rowIndex).val('');
+                        }
+        @*$("#txtRemark_" + _rowIndex).val('@item.Remark');*@
+        @*$("#txtRemark_" + _rowIndex).val('@Html.Raw(item.Remark.Replace("<br/>", "\\n"))');  //*@
+        $("#selectWorkStatus_" + _rowIndex).val('@item.Status');
+
+        </text>
+
+            }
+        }
+
+        @if ((Model.WeeklyReport != null && Model.WeeklyReport.Checked) || Model.AllowPost == false)
+        {
+            <text>
+
+        $("#btnNew").hide();
+        $("#btnSave").hide();
+        $("#divCheckResult").show();
+        $('#weekLogTable tr').find('td:eq(7)').hide();
+
+        $("#weeklyReportTable").find("select").attr("disabled", "disabled");
+        $("#weeklyReportTable").find("input").attr("disabled", "disabled");
+        $("#weeklyReportTable").find("textarea").attr("disabled", "disabled");
+        </text>
+        }
+    }
+
+    function addWeekLog() {
+
+        _rowIndex++;
+
+        var table = document.getElementById('weeklyReportTable');
+
+        var newRow = table.insertRow(table.rows.length);
+
+
+        //工作组别
+        var tdOrganization = newRow.insertCell(newRow.cells.length);
+        $(tdOrganization).attr("class", "td_weeklyReportPost");
+        $(tdOrganization).attr("valign", "top");
+        var btnOrganization = document.createElement("input");
+        btnOrganization.setAttribute("id", "btnOrganization_" + _rowIndex);
+        btnOrganization.setAttribute("name", "btnOrganization_" + _rowIndex);
+        btnOrganization.setAttribute("type", "button");
+        btnOrganization.setAttribute("class", "btn_white");
+        @if (ViewBag.UserContext.Organization != null) {
+            @:btnOrganization.setAttribute("value", "@ViewBag.UserContext.Organization.Name");
+        }
+
+        //btnOrganization.setAttribute("onclick", "chooseOrganization('" + _rowIndex + "')");
+        btnOrganization.setAttribute("disabled", "disabled");
+        tdOrganization.appendChild(btnOrganization);
+
+        var txtOrganizationId = document.createElement("input");
+        txtOrganizationId.setAttribute("id", "txtOrganizationId_" + _rowIndex);
+        txtOrganizationId.setAttribute("name", "txtOrganizationId_" + _rowIndex);
+        txtOrganizationId.setAttribute("type", "hidden");
+        @if (ViewBag.UserContext.Organization != null)
+        {
+            @:txtOrganizationId.setAttribute("value", "@ViewBag.UserContext.Organization.Id");
+        }
+        tdOrganization.appendChild(txtOrganizationId);
+
+        //项目名称
+        var tdWorkType = newRow.insertCell(newRow.cells.length);
+        $(tdWorkType).attr("class", "td_weeklyReportPost");
+        $(tdWorkType).attr("valign", "top");
+        var selectWorkType = document.createElement("select");
+        selectWorkType.setAttribute("id", "selectWorkType_" + _rowIndex);
+        selectWorkType.setAttribute("name", "selectWorkType_" + _rowIndex);
+        selectWorkType.setAttribute("class", "input_weeklyReportPost");
+        tdWorkType.appendChild(selectWorkType);
+
+        @foreach (var item in Model.WorkTypeList)
+        {
+            <text>
+        var optionObj = new Option('@item.Name', '@item.Id', false, true);
+        document.getElementById('selectWorkType_' + _rowIndex).options.add(optionObj);
+        document.getElementById('selectWorkType_' + _rowIndex).selectedIndex = 0;
+        </text>
+        }
+
+        $("#selectWorkType_" + _rowIndex).rules("add", {
+            required: true,
+            messages: {
+                required: "请选择。"
+            }
+        });
+
+        //子项目
+        var tdWorkTask = newRow.insertCell(newRow.cells.length);
+        $(tdWorkTask).attr("class", "td_weeklyReportPost");
+        $(tdWorkTask).attr("valign", "top");
+        var selectWorkTask = document.createElement("select");
+        selectWorkTask.setAttribute("id", "selectWorkTask_" + _rowIndex);
+        selectWorkTask.setAttribute("name", "selectWorkTask_" + _rowIndex);
+        selectWorkTask.setAttribute("class", "input_weeklyReportPost");
+        tdWorkTask.appendChild(selectWorkTask);
+
+        loadWorkTaskList(_rowIndex);
+
+        $('#selectWorkType_' + _rowIndex).change(function ()
+        {
+            var rowIndex = $(this).attr("id").split("_")[1];
+            loadWorkTaskList(rowIndex);
+        })
+
+        $("#selectWorkTask_" + _rowIndex).rules("add", {
+            required: true,
+            messages: {
+                required: "请选择。"
+            }
+        });
+
+        var tdContent = newRow.insertCell(newRow.cells.length);
+        $(tdContent).attr("class", "td_weeklyReportPost");
+        $(tdContent).attr("valign", "top");
+        var txtContent = document.createElement("textarea");
+        txtContent.setAttribute("id", "txtContent_" + _rowIndex);
+        txtContent.setAttribute("name", "txtContent_" + _rowIndex);
+        txtContent.setAttribute("rows", "3");
+        txtContent.setAttribute("class", "input_weeklyReportPost");
+        //   txtContent.setAttribute("required");
+        tdContent.appendChild(txtContent);
+
+        // alert($('#txtContent_' + _rowIndex).rules);
+        // $('#txtContent_' + _rowIndex).rules("remove");
+
+        $("#txtContent_" + _rowIndex).rules("add", {
+            required: true,
+            messages: {
+                required: "请输入工作内容。"
+            }
+        });
+
+        //完成情况
+        var tdStatus = newRow.insertCell(newRow.cells.length);
+        $(tdStatus).attr("class", "td_weeklyReportPost");
+        $(tdStatus).attr("valign", "top");
+        var selectStatus = document.createElement("select");
+        selectStatus.setAttribute("id", "selectWorkStatus_" + _rowIndex);
+        selectStatus.setAttribute("name", "selectWorkStatus_" + _rowIndex);
+        selectStatus.setAttribute("class", "input_weeklyReportPost");
+        tdStatus.appendChild(selectStatus);
+
+        @foreach (var item in Model.WorkStatusList)
+        {
+            if (string.IsNullOrEmpty(item.Name))
+            {
+                continue;
+            }
+
+            <text>
+        var optionObj = new Option('@item.Name', '@item.Id', false, true);
+        document.getElementById('selectWorkStatus_' + _rowIndex).options.add(optionObj);
+        </text>
+        }
+
+        $("#selectWorkStatus_" + _rowIndex).rules("add", {
+            required: true,
+            messages: {
+                required: "请选择。"
+            }
+        });
+
+        //var tdTime = newRow.insertCell();
+        //$(tdTime).attr("class", "td_weeklyReportPost");
+        //$(tdTime).attr("valign", "top");
+        //var txtTime = document.createElement("input");
+        //txtTime.setAttribute("id", "txtTime_" + _rowIndex);
+        //txtTime.setAttribute("name", "txtTime_" + _rowIndex);
+        //txtTime.setAttribute("type", "text");
+        //txtTime.setAttribute("class", "input_weeklyReportPost");
+        ////  txtTime.setAttribute("required");
+        //tdTime.appendChild(txtTime);
+
+        //$("#txtTime_" + _rowIndex).rules("add", {
+        //    required: true,
+        //    number: true,
+        //    messages: {
+        //        required: "请输入。"
+        //    }
+        //});
+
+        //日期
+        var tdDate = newRow.insertCell(newRow.cells.length);
+        $(tdDate).attr("class", "td_weeklyReportPost");
+        $(tdDate).attr("valign", "top");
+        var txtDate = document.createElement("input");
+        txtDate.setAttribute("id", "txtDate_" + _rowIndex);
+        txtDate.setAttribute("name", "txtDate_" + _rowIndex);
+        txtDate.setAttribute("type", "text");
+        txtDate.setAttribute("class", "input_weeklyReportPost");
+        txtDate.setAttribute("value", "@DateTime.Now.ToString("yyyy-MM-dd")");
+        txtDate.setAttribute("onclick", "laydate({istime: false, format: 'YYYY-MM-DD',min:'@Model.ItemStartDate',max:'@Model.ItemEndDate'})");
+        //  txtTime.setAttribute("required");
+        tdDate.appendChild(txtDate);
+
+        $("#txtDate_" + _rowIndex).rules("add", {
+            required: true,
+            messages: {
+                required: "请输入。"
+            }
+        });
+
+        //备注
+        //var tdRemark = newRow.insertCell(newRow.cells.length);
+        //$(tdRemark).attr("class", "td_weeklyReportPost");
+        //$(tdRemark).attr("valign", "top");
+        //var txtRemark = document.createElement("textarea");
+        //txtRemark.setAttribute("id", "txtRemark_" + _rowIndex);
+        //txtRemark.setAttribute("name", "txtRemark_" + _rowIndex);
+        //txtRemark.setAttribute("type", "text");
+        //txtRemark.setAttribute("rows", "3");
+        //txtRemark.setAttribute("class", "input_weeklyReportPost");
+        ////  txtTime.setAttribute("required");
+        //tdRemark.appendChild(txtRemark);
+
+
+
+
+        @if ((Model.WeeklyReport == null || Model.WeeklyReport.Checked == false) && Model.AllowPost)
+        {
+            <text>
+        var tdOperation = newRow.insertCell(newRow.cells.length);
+        $(tdOperation).attr("class", "td_weeklyReportPost");
+        $(tdOperation).attr("align", "right");
+        $(tdOperation).attr("valign", "top");
+        var btnRemove = document.createElement("input");
+        btnRemove.setAttribute("id", "btnRemove" + _rowIndex);
+        btnRemove.setAttribute("name", "btnRemove" + _rowIndex);
+        btnRemove.setAttribute("type", "button");
+        btnRemove.setAttribute("class", "btn_red");
+        btnRemove.setAttribute("value", "删除");
+        btnRemove.setAttribute("onclick", "removeWeeklyReportItem(this)");
+        tdOperation.appendChild(btnRemove);
+        </text>
+        }
+
+
+
+    }
+
+    function loadWorkTaskList(rowIndex) {
+        $("#selectWorkTask_" + rowIndex).empty();
+        var workTypeId = $("#selectWorkType_" + rowIndex).val();
+
+
+        @foreach (var item in Model.WorkTaskList)
+        {
+            <text>
+        if ('@item.WorkType' == workTypeId)
+        {
+            var optionObj = new Option('@item.Name', '@item.Id', true, false);
+            document.getElementById('selectWorkTask_' + rowIndex).options.add(optionObj);
+        }
+        </text>
+        }
+    }
+
+    function removeWeeklyReportItem(obj)
+    {
+        var msg = "是否确认删除此条目？"
+
+        var index = layer.confirm(msg, {
+            btn: ['确认', '取消'], //按钮
+            shade: [0.4, '#393D49'],
+            title: false,
+            closeBtn: false,
+            shift:_layerShift
+        }, function ()
+        {
+            layer.close(index);
+
+            $(obj).parent("td").parent("tr").remove();
+        });
+
+    }
+
+    function save() {
+        if ($("#formLog").validate().form() == false){
+            layerInputAlertMsg();
+            return;
+        }
+
+        var itemList = new Array();
+
+        var sort = 0;
+
+        $("#weeklyReportTable tr:gt(1)").each(function (n, value) {
+
+            sort++;
+
+            var item = new Object();
+            item.Sort = sort;
+            itemList[n] = item;
+
+            $(this).find("td").each(function (n, value) {
+                switch (n) {
+                    case 0://工作组别
+                        item.Organization = $(this).find("input[type=hidden]").val();
+                        break;
+                    case 1://项目名称
+                        item.WorkType = $(this).find("option:selected").val();
+                        break;
+                    case 2://子项目
+                        item.WorkTask = $(this).find("option:selected").val();
+                        break;
+                    case 3://工作内容
+                        item.Content = $(this).find("textarea").val();
+                        item.Content = item.Content.replace(new RegExp("\n", "gm"), "<br/>");
+                        break;
+                    case 4://完成情况
+                        item.Status = $(this).find("option:selected").val();
+                        break;
+                        //case 4://用时（天）
+                        //    item.Time = $(this).find("input").val();
+                        //    break;
+                    case 5: //日期
+                        item.Date = $(this).find("input").val();
+                        break;
+                    //case 6://备注
+                    //    item.Remark = $(this).find("textarea").val();
+                    //    item.Remark = item.Remark.replace(new RegExp("\n", "gm"), "<br/>");
+                    //    break;
+                }
+            });
+        });
+
+        if(itemList.length === 0){
+            layerAlert("请填写周报内容后再提交。");
+            return;
+        }
+
+        var weeklyReport = new Object();
+
+        if (_weeklyReportId !== "") {
+            weeklyReport.Id = _weeklyReportId;
+        }
+        weeklyReport.Year =@Model.Year;
+        weeklyReport.Month = @Model.Month;
+        weeklyReport.WeekOfYear = @Model.WeekOfYear;
+        weeklyReport.ItemList = itemList;
+
+        $.ajax({
+            url: "/Api/WeeklyReport/Post",
+            data:JSON.stringify(weeklyReport),
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+
+                if(data.Success){
+                    _weeklyReportId = data.Data.WeekLogId;
+
+                    layer.msg("您的周报提交成功！", {
+                        time: 3000
+                    });
+                }else{
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    var _organizationSelectorLayerIndex;
+
+    function chooseOrganization(rowId){
+        // $(obj).parent("td").parent("tr").remove();
+
+        _organizationSelectorLayerIndex = layer.open({
+            type: 2,
+            area: ['500px', '430px'], //宽高
+            closeBtn: false,
+            title: "选择",
+            shift: _layerShift,
+            content: '/Unity/OrganizationSelector?domId=' + rowId
+        });
+    }
+
+    function selectOrganization(domId, id, name)
+    {
+        $("#txtOrganizationId_" + domId).val(id);
+        $("#btnOrganization_" + domId).val(name);
+
+        layer.close(_organizationSelectorLayerIndex);
+        //layer.closeAll();
+
+        $("#" + domId).change();
+    }
+
+</script>
+
+@Helpers.TitleWithDate("填写", this.ViewBag)
+<div style="margin-top: 20px; height: 50px; background: #D8E6ED">
+    <div style="float: left; margin-left: 20px; margin-right: 20px">
+        <table border="0" cellspacing="0" cellpadding="0" height="50">
+            <tr>
+                <td>
+                    <select id="selectYear" class="input_18">
+                        @foreach (var item in ViewBag.YearList)
+                        {
+                            <option>@item</option>
+                        }
+                    </select>
+                </td>
+                <td width="15">
+                    &nbsp;
+
+                </td>
+                <td>
+                    <select id="selectMonth" class="input_18">
+
+                        @if (Model.Year == DateTime.Now.Year)
+                        {
+                            for (int i = 1; i < 12; i++)
+                            {
+                                if (i > DateTime.Now.Month)
+                                {
+                                    break;
+                                }
+
+                                <option>@i</option>
+                            }
+                        }
+                        else
+                        {
+                            <option>1</option>
+                            <option>2</option>
+                            <option>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                            <option>9</option>
+                            <option>10</option>
+                            <option>11</option>
+                            <option>12</option>
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+    @*<div class="weekTab">
+            <a href="#">6/29 - 7/5</a>
+        </div>
+        <div class="weekTab">
+            <a href="#">7/6 - 7/12</a>
+        </div>
+        <div class="weekTab weekTab_active">
+            7/13 - 7/19
+        </div>
+        <div class="weekTab">
+            <a href="#">7/20 - 7/26 </a>
+        </div>
+        <div class="weekTab">
+            <a href="#">7/27 - 8/6</a>
+        </div>*@
+    @foreach (var item in Model.WeekList)
+    {
+        if (Model.Year == DateTime.Now.Year && item.WeekOfYear > Model.CurrentWeekOfYear)
+        {
+            break;
+        }
+
+        <div class="weekTab  @if (item.WeekOfYear == Model.WeekOfYear)
+                             {
+                    @Html.Raw("weekTab_active")
+                             }">
+            @if (item.WeekOfYear == Model.WeekOfYear)
+            {
+                @Html.Raw(item.Monday.ToString("MM/dd") + " - " + item.Sunday.ToString("MM/dd") + (Model.Year == DateTime.Now.Year && item.WeekOfYear == Model.CurrentWeekOfYear ? "（本周）" : ""))
+            }
+            else
+            {
+                @Html.ActionLink(item.Monday.ToString("MM/dd") + " - " + item.Sunday.ToString("MM/dd") + (Model.Year == DateTime.Now.Year && item.WeekOfYear == Model.CurrentWeekOfYear ? "（本周）" : ""), "Post",
+                    new { week = item.WeekOfYear, year = Model.Year, month = Model.Month })
+            }
+        </div>
+    }
+</div>
+
+@if (Model.WorkTypeList.Count == 0 || Model.WorkTaskList.Count == 0 || Model.WorkStatusList.Count == 0)
+{
+    <div id="divMessage" class="div_red" style="margin: 10px; margin-top: 20px;">
+        请先到设置中配置项目名称、子项目和完成情况。
+    </div>
+}
+
+@if (Model.Notify)
+{
+    <div id="divMessage" class="div_red" style="margin: 10px; margin-top: 20px;">
+        您好，您在本周过去的时间内有未填写的总结，请填写。
+    </div>
+}
+
+@if (Model.WeeklyReport != null && Model.WeeklyReport.Checked)
+{
+    <div id="divCheckResult" style="margin-top: 20px;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td style="color:red">当前周报处于已阅状态，不可进行修改。</td>
+            </tr>
+            @*<tr>
+                <td valign="top">
+                    <div>
+                        @foreach (var item in Model.WeeklyReport.CheckPointList)
+                        {
+                            <div style="float: left; line-height: 34px; margin-right: 20px;">
+                                @item.CheckPointName：@item.CheckPointItemName（@item.Score）
+                            </div>
+                        }
+                    </div>
+                </td>
+            </tr>
+
+            @if (String.IsNullOrEmpty(Model.WeeklyReport.CheckRemark) == false)
+            {
+                <tr>
+                    <td valign="bottom" height="10"></td>
+                </tr>
+                <tr>
+                    <td valign="top">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td width="100">审核意见：</td>
+                                <td>@Model.WeeklyReport.CheckRemark</td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            }*@
+        </table>
+    </div>
+}
+else
+{
+    if (Model.AllowPost == false)
+    {
+        <div id="divCheckResult" style="margin-top: 20px;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td style="color:red">已超过允许编辑的时间限制。</td>
+                </tr>
+            </table>
+        </div>
+    }
+}
+
+
+<div style="margin-top: 35px; margin-bottom: 20px;">
+    <div>
+        <form id="formLog" name="formLog" method="post" role="form">
+            <table width="100%" border="0" cellspacing="0" cellpadding="2" id="weeklyReportTable">
+                <tr>
+                    <td width="120" class="td_weeklyReportPost">工作组别</td>
+                    <td width="140" class="td_weeklyReportPost">项目名称</td>
+                    <td width="130" class="td_weeklyReportPost">子项目</td>
+                    <td class="td_weeklyReportPost">工作内容</td>
+                    <td width="100" class="td_weeklyReportPost">完成情况</td>
+                    @* <td width="80" class="td_weeklyReportPost">用时</td>*@
+                    <td width="100" class="td_weeklyReportPost">日期</td>
+                    @*<td width="150" class="td_weeklyReportPost">备注</td>*@
+                    @if ((Model.WeeklyReport == null || Model.WeeklyReport.Checked == false) && Model.AllowPost)
+                    {
+                        <td width="90" class="td_weeklyReportPost">&nbsp;</td>
+                    }
+                </tr>
+                <tr>
+                    <td colspan="@if ((Model.WeeklyReport == null || Model.WeeklyReport.Checked == false) && Model.AllowPost)
+                                 {
+                                      @Html.Raw("8");
+                                 }
+                                 else
+                                 {
+                                      @Html.Raw("7");
+                                 }" height="20">
+                        <div style="background: #D4D4D4; height: 1px;">
+                        </div>
+                    </td>
+                </tr>
+                @*<tr>
+                        <td valign="top" class="td_weeklyReportPost">
+                            <select name="select" class="input_weeklyReportPost">
+                                <option></option>
+                            </select>
+                        </td>
+                        <td valign="top" class="td_weeklyReportPost">
+                            <select name="select2" class="input_weeklyReportPost">
+                                <option></option>
+                            </select>
+                        </td>
+                        <td valign="top" class="td_weeklyReportPost">
+                            <textarea class="input_weeklyReportPost"></textarea>
+                        </td>
+                        <td valign="top" class="td_weeklyReportPost">
+                            <select name="select3" class="input_weeklyReportPost">
+                                <option></option>
+                            </select>
+                        </td>
+                        <td valign="top" class="td_weeklyReportPost"><input class="input_weeklyReportPost" /></td>
+                        <td align="right" valign="top">
+                            <input type="button" value="删除" class="btn_blue" />
+                        </td>
+                    </tr>*@
+            </table>
+        </form>
+    </div>
+    @if ((Model.WeeklyReport == null || Model.WeeklyReport.Checked == false) && Model.AllowPost)
+    {
+        <div style="margin-top: 30px;margin:15px 5px 5px 0px">
+            <div style="float:left">
+                <input name="btnCreateSave" type="button" class="btn_blue" id="btnCreateSave" value="新 增" onclick="addWeekLog()" />
+            </div>
+            <div style="float:right">
+                <input name="btnCreateCancel" type="button" class="btn_blue" id="btnCreateCancel" value="提 交" style="margin-left: 1px;" onclick="save()" />
+            </div>
+            <div style="clear:both"></div>
+        </div>
+    }
+</div>
+

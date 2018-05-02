@@ -1,0 +1,727 @@
+﻿@model Sheng.Enterprise.Web.Models.OrganizationalStructureViewModel
+
+@{
+    ViewBag.Title = "组织架构";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "设 置";
+    ViewBag.MainMenu = "Settings";
+    ViewBag.LeftMenu = "Organization";
+}
+
+@Styles.Render("~/Content/zTreeStyle/zTreeStyle.css")
+@Scripts.Render("~/Scripts/ztree/jquery.ztree.all-3.5.min.js")
+
+<style type="text/css">
+    .ztree li span.button.switch.level0 {
+        visibility: hidden;
+        width: 1px;
+    }
+
+    .ztree li ul.level0 {
+        padding: 0;
+        background: none;
+    }
+</style>
+
+<script type="text/javascript">
+
+    //新增子节点的模式，child：子级，brother：平级
+    var _createMode = "child";
+    var _createDivHtml;
+    var _treeObj;
+    var _domainValidator;
+    var _organizationValidator;
+
+    $(document).ready(function () {
+        loadOrganizationTree();
+        _createDivHtml = $("#divCreate").html();
+        $("#divCreate").html("");
+
+        _domainValidator = $("#formRootOrganization").validate({
+            rules: {
+                "txtDomainName": "required"
+            },
+            messages: {
+                "txtDomainName": "!"
+            }
+        });
+
+        _organizationValidator = $("#formOrganization").validate({
+            rules: {
+                "txtOrganizationName": "required"
+            },
+            messages: {
+                "txtOrganizationName": "!"
+            }
+        });
+
+        $("[keyenter]").keypress(function (e) {
+            if (e.keyCode == 13) {
+                if ($('#divRootOrganization').is(':visible')) {
+                    saveRootOrganization();
+                } else if ($('#divOrganization').is(':visible')) {
+                    saveOrganization();
+                }
+            }
+        });
+
+    });
+
+
+    function getSelectedNode() {
+        var nodes = _treeObj.getSelectedNodes();
+        if (nodes.length != 1)
+            return null;
+
+        return nodes[0];
+    }
+
+    function loadOrganizationTree() {
+        var setting = {
+            view: {
+                dblClickExpand: false,
+                showLine: true,
+                selectedMulti: false
+                //  fontCss: setFontCss
+            },
+            data: {
+                key: {
+                    name: "Name"
+                },
+                simpleData: {
+                    enable: true,
+                    idKey: "Id",
+                    pIdKey: "Parent",
+                    rootPId: "@Model.Domain.Id"
+                }
+            },
+            callback: {
+                onClick: zTreeOnClick
+            }
+        };
+
+        var zNodes = new Array();
+
+        @*var root = new Object();
+        root.Id = '@Model.Domain.Id';
+        root.Parent = '';
+        root.Name = '@Model.Domain.Name';
+        zNodes[0] = root;*@
+
+        //var i = 1;
+        var i = 0;
+        @foreach (var item in Model.OrganizationList)
+        {
+            <text>
+        var oranization = new Object();
+        oranization.Id = '@item.Id';
+        oranization.Parent = '@item.Parent';
+        oranization.Name = '@item.Name';
+        zNodes[i] = oranization;
+        i++;
+        </text>
+        }
+
+        _treeObj = $.fn.zTree.init($("#tree"), setting, zNodes);
+        _treeObj.expandAll(true);
+        var nodes = _treeObj.getNodes();
+        if (nodes.length > 0) {
+            _treeObj.selectNode(nodes[0]);
+            selectNode(nodes[0]);
+        }
+    }
+
+    function setFontCss(treeId, treeNode) {
+        //不支持修改字体大小
+        //http://tieba.baidu.com/p/2039464909
+        //直接在zTree的css里调整
+        // return treeNode.level == 0 ? { color: "red" } : {};
+        //font-size:18px;
+        return { 'font-size': '18' };
+    }
+
+    function loadRootOrganization() {
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        $("#divRootOrganization").show();
+        $("#divOrganization").hide();
+
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        $.ajax({
+            url: "/Api/Domain/GetOrganization?id=" + treeNode.Id,
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                layer.closeAll();
+                hideMask();
+
+                if (data.Success) {
+                    $("#txtDomainName").val(data.Data.Name);
+
+                    _domainValidator.resetForm();
+                } else {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.closeAll();
+                hideMask();
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function loadOrganization() {
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        $("#divRootOrganization").hide();
+        $("#divOrganization").show();
+
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        $.ajax({
+            url: "/Api/Domain/GetOrganization?id=" + treeNode.Id,
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                layer.closeAll();
+                hideMask();
+
+                if (data.Success) {
+                    $("#txtOrganizationName").val(data.Data.Name);
+                    $("#txtOrganizationTelphone").val(data.Data.Telphone);
+
+                    _organizationValidator.resetForm();
+
+                } else {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.closeAll();
+                hideMask();
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function zTreeOnClick(event, treeId, treeNode) {
+        selectNode(treeNode);
+    }
+
+    function selectNode(treeNode) {
+        $("#btnCreateChildOrganization").removeAttr("disabled");
+
+        if (treeNode.Id == "@Model.Domain.Id") {
+            $("#btnCreateBrotherOrganization").attr({ "disabled": "disabled" });
+        }
+        else {
+            $("#btnCreateBrotherOrganization").removeAttr("disabled");
+        }
+
+        //如果选中的是根节点
+        if (treeNode.Id == '@Model.Domain.Id') {
+            loadRootOrganization();
+        }
+        else {
+            loadOrganization();
+        }
+    }
+
+    function createChildOrganization() {
+        _createMode = "child";
+
+        showCreateDiv();
+    }
+
+    function createBrotherOrganization() {
+        _createMode = "brother";
+
+        showCreateDiv();
+    }
+
+    function showCreateDiv() {
+        var title;
+        if (_createMode == "child") {
+            title = "新增子级";
+        }
+        else {
+            title = "新增平级";
+        }
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['500px', '240px'], //宽高
+            closeBtn: false,
+            title: title,
+            content: _createDivHtml,
+            shift: _layerShift,
+            success: function (layero, index) {
+                $(layero).focus();
+                $(layero).keypress(function (e) {
+                    if (e.keyCode == 27) {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        $("#tableEdit").find("[keyenter]").keypress(function (e) {
+            if (e.keyCode == 13) {
+                createSave();
+            }
+        });
+
+        $("#txtCreateName").focus();
+    }
+
+    function closeAllLayer() {
+        layer.closeAll();
+    }
+
+    function createSave() {
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        if ($("#formCreate").validate({
+            rules: {
+                "txtCreateName": "required"
+        },
+            messages: {
+                "txtCreateName": "!"
+        }
+        }).form() == false) {
+            return;
+        }
+
+        $("#divCreateMask").show();
+
+        var organization = new Object();
+
+        if (_createMode == "child") {
+            organization.Parent = treeNode.Id;
+        }
+        else {
+            organization.Parent = treeNode.Parent;
+        }
+
+        organization.Domain = '@Model.Domain.Id';
+        organization.Name = $("#txtCreateName").val();
+        organization.Telphone = $("#txtCreateTelphone").val();
+
+        $.ajax({
+            url: "/Api/Domain/CreateOrganization",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(organization),
+            success: function (data, status, jqXHR) {
+                if (data.Success) {
+                    organization.Id = data.Data.Id;
+
+                    var parentNode = _treeObj.getNodeByParam("Id", organization.Parent, null);
+                    _treeObj.addNodes(parentNode, organization);
+
+                    closeAllLayer();
+
+                } else {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function saveRootOrganization() {
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        if (treeNode.Id != '@Model.Domain.Id')
+            return;
+
+        if (_domainValidator.form() == false) {
+            return;
+        }
+
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        var organization = new Object();
+        organization.Id = treeNode.Id;
+        organization.Domain = '@Model.Domain.Id';
+        organization.Name = $("#txtDomainName").val();
+        //domain.ContactPerson = $("#txtDomainContactPerson").val();
+        //domain.Email = $("#txtDomainEmail").val();
+        //domain.Telphone = $("#txtDomainTelphone").val();
+
+        $.ajax({
+            url: "/Api/Domain/UpdateOrganization",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(organization),
+            success: function (data, status, jqXHR) {
+                layer.closeAll();
+                hideMask();
+
+                if (data.Success) {
+                    treeNode.Name = organization.Name;
+                    _treeObj.updateNode(treeNode);
+
+                    layer.msg("组织机构信息更新成功。", {
+                        time: 1000
+                    });
+                } else {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.closeAll();
+                hideMask();
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function saveOrganization() {
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        if (_organizationValidator.form() == false) {
+            return;
+        }
+
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        var organization = new Object();
+
+        organization.Id = treeNode.Id;
+        organization.Parent = treeNode.Parent;
+        organization.Domain = '@Model.Domain.Id';
+        organization.Name = $("#txtOrganizationName").val();
+        organization.Telphone = $("#txtOrganizationTelphone").val();
+
+        $.ajax({
+            url: "/Api/Domain/UpdateOrganization",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(organization),
+            success: function (data, status, jqXHR) {
+                layer.closeAll();
+                hideMask();
+
+                if (data.Success) {
+                    treeNode.Name = organization.Name;
+                    _treeObj.updateNode(treeNode);
+
+                    layer.msg("组织机构信息更新成功。", {
+                        time: 1000
+                    });
+                } else {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.closeAll();
+                hideMask();
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function removeOrganization() {
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        layer.confirm("是否确定删除 " + treeNode.Name + " 及其所有子级？", { title: false, closeBtn: false, shift: _layerShift }, function (index) {
+            layer.close(index);
+
+            showMask();
+            var layerIndex = layer.load(0, {
+                shade: false
+            });
+
+            $.ajax({
+                url: "/Api/Domain/RemoveOrganization?id=" + treeNode.Id,
+                type: "POST",
+                dataType: "json",
+                success: function (data, status, jqXHR) {
+                    layer.closeAll();
+                    hideMask();
+
+                    if (data.Success) {
+                        _treeObj.removeNode(treeNode);
+
+                        var parentNode = _treeObj.getNodeByParam("Id", treeNode.Parent, null);
+                        _treeObj.selectNode(parentNode);
+                        selectNode(parentNode);
+
+                    } else {
+                        layerAlert(data.Message);
+                    }
+                },
+                error: function (xmlHttpRequest) {
+                    layer.closeAll();
+                    hideMask();
+
+                    alert("Error: " + xmlHttpRequest.status);
+                }
+            });
+        });
+
+
+    }
+
+    function moveUp() {
+
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        var preNode = treeNode.getPreNode();
+        if (preNode == null)
+            return;
+
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        $.ajax({
+            url: "/Api/Domain/MoveOrganization?id=" + treeNode.Id + "&id2=" + preNode.Id,
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+
+
+                if (data.Success) {
+                    //_treeObj.moveNode(treeNode, preNode, "prev");
+                    //_treeObj.refresh();
+                    window.location.reload();
+                } else {
+
+
+                    layer.closeAll();
+                    hideMask();
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.closeAll();
+                hideMask();
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function moveDown() {
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        var preNode = treeNode.getNextNode();
+        if (preNode == null)
+            return;
+
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        $.ajax({
+            url: "/Api/Domain/MoveOrganization?id=" + treeNode.Id + "&id2=" + preNode.Id,
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+
+
+                if (data.Success) {
+                      window.location.reload();
+                    //_treeObj.moveNode(treeNode, preNode, "next");
+                    //_treeObj.refresh();
+
+                } else {
+                    layer.closeAll();
+                    hideMask();
+
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.closeAll();
+                hideMask();
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+</script>
+
+
+<div id="divContent">
+    <div id="divContainerTitle">
+        组织机构
+    </div>
+    @*<div style=" margin-top:20px;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="td_ContentTab">
+                    @Html.ActionLink("基本信息", "Organization", "Settings", null, new { @class = "a_black_16" })
+                </td>
+                <td class="td_ContentTab_active">组织架构</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="3" bgcolor="#D4D4D4" height="1"></td>
+            </tr>
+        </table>
+
+    </div>*@
+    <div style="margin-left:20px; margin-top:10px;">
+        <input name="btnCreateChildOrganization" type="button" class="btn_blue" id="btnCreateChildOrganization" onclick="createChildOrganization()" value="新增子级" disabled /><input name="btnCreateBrotherOrganization" type="button" class="btn_blue" id="btnCreateBrotherOrganization" onclick="createBrotherOrganization()" value="新增平级" style="margin-left:1px;" disabled />
+    </div>
+
+    <div style="position:absolute; top:100px; bottom:0px;left:20px;width:240px; OVERFLOW :auto; ">
+        <div>
+            <ul id="tree" class="ztree"></ul>
+        </div>
+    </div>
+
+    <div id="divRootOrganization" style="display:none; position:absolute; top:100px; bottom:0px;left:280px;right:20px;OVERFLOW-Y: auto;">
+        <form id="formRootOrganization">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="100" height="50">机构名称：</td>
+                    <td><input name="txtDomainName" type="text" class="input_18" style="width:300px;" id="txtDomainName" maxlength="50" keyenter /> *</td>
+                </tr>
+                @*<tr>
+                    <td height="50">联系人：</td>
+                    <td><input name="txtDomainContactPerson" type="text" class="input_18" style="width:300px;" id="txtDomainContactPerson" maxlength="25" keyenter /></td>
+                </tr>
+                <tr>
+                    <td height="50">联系电话：</td>
+                    <td><input name="txtDomainTelphone" type="text" class="input_18" style="width:300px;" id="txtDomainTelphone" maxlength="50" keyenter /></td>
+                </tr>
+                <tr>
+                    <td height="50">电子邮件：</td>
+                    <td><input name="txtDomainEmail" type="text" class="input_18" style="width:300px;" id="txtDomainEmail" maxlength="100" keyenter /></td>
+                </tr>*@
+            </table>
+        </form>
+        <table width="50%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+        <table width="500" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td height="50"><input name="btnSaveDomain" type="button" class="btn_blue" id="btnSaveDomain" onclick="saveRootOrganization()" value="保 存" /></td>
+            </tr>
+
+        </table>
+    </div>
+
+    <div id="divOrganization" style="display:none; position:absolute; top:100px; bottom:0px;left:280px;right:20px;OVERFLOW-Y: auto;">
+        <form id="formOrganization">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="100" height="50">名称：</td>
+                    <td><input name="txtOrganizationName" type="text" class="input_18" style="width:300px;" id="txtOrganizationName" maxlength="50" keyenter /> *</td>
+                </tr>
+                <tr>
+                    <td height="50">电话：</td>
+                    <td><input name="txtOrganizationTelphone" type="text" class="input_18" style="width:300px;" id="txtOrganizationTelphone" maxlength="50" keyenter /></td>
+                </tr>
+            </table>
+        </form>
+        <table width="50%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+        <table width="500" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td height="50">
+                    <input name="btnSaveOrganization" type="button" class="btn_blue" id="btnSaveOrganization" onclick="saveOrganization()" value="保 存" />
+                    <input name="btnRemoveOrganization" type="button" class="btn_blue" id="btnRemoveOrganization" onclick="moveUp()" value="上 移" style="margin-left:2px;" />
+                    <input name="btnRemoveOrganization" type="button" class="btn_blue" id="btnRemoveOrganization" onclick="moveDown()" value="下 移" style="margin-left:2px;" />
+
+                    <input name="btnRemoveOrganization" type="button" class="btn_red" id="btnRemoveOrganization" onclick="removeOrganization()" value="删 除" style="margin-left:20px;" />
+
+                </td>
+            </tr>
+
+        </table>
+    </div>
+
+</div>
+
+
+<div id="divCreate" style="display:none">
+    <div id="divCreateMask" style=" display:none; position:absolute;top:0px;right:0px;bottom:0px;left:0px;background-color:white">
+        <div style="margin-left:30px;margin-top:20px;">请稍候...</div>
+    </div>
+    <table width="450" border="0" align="center" cellpadding="0" cellspacing="0" id="tableEdit">
+        <tr>
+            <td>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <form id="formCreate">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="100" height="50">名称：</td>
+                            <td><input name="txtCreateName" type="text" class="input_18" style="width:300px;" id="txtCreateName" maxlength="50" keyenter /> *</td>
+                        </tr>
+                        <tr>
+                            <td height="50">电话：</td>
+                            <td><input name="txtCreateTelphone" type="text" class="input_18" style="width:300px;" id="txtCreateTelphone" maxlength="50" keyenter /></td>
+                        </tr>
+                    </table>
+                </form>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td height="50" align="right">
+                            <input name="btnCreateSave" type="button" class="btn_blue" id="btnCreateSave" onclick="createSave()" value="保 存" /><input name="btnCreateCancel" type="button" class="btn_blue" id="btnCreateCancel" onclick="closeAllLayer()" value="取 消" style="margin-left:1px;" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</div>

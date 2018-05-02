@@ -12,48 +12,6 @@ namespace Sheng.Enterprise.Web.Controllers
 {
 	public class WeeklyReportController : EnterpriseController
 	{
-		[CompilerGenerated]
-		private static class <>o__4
-		{
-			public static CallSite<Func<CallSite, object, int, object>> <>p__0;
-		}
-
-		[CompilerGenerated]
-		private static class <>o__5
-		{
-			public static CallSite<Func<CallSite, object, int, object>> <>p__0;
-		}
-
-		[CompilerGenerated]
-		private static class <>o__6
-		{
-			public static CallSite<Func<CallSite, object, int, object>> <>p__0;
-		}
-
-		[CompilerGenerated]
-		private static class <>o__7
-		{
-			public static CallSite<Func<CallSite, object, int, object>> <>p__0;
-		}
-
-		[CompilerGenerated]
-		private static class <>o__8
-		{
-			public static CallSite<Func<CallSite, object, int, object>> <>p__0;
-		}
-
-		[CompilerGenerated]
-		private static class <>o__9
-		{
-			public static CallSite<Func<CallSite, object, int, object>> <>p__0;
-		}
-
-		[CompilerGenerated]
-		private static class <>o__10
-		{
-			public static CallSite<Func<CallSite, object, int, object>> <>p__0;
-		}
-
 		private static readonly SettingsManager _settingsManager = SettingsManager.Instance;
 
 		private static readonly WeeklyReportManager _weeklyReportManager = WeeklyReportManager.Instance;
@@ -62,7 +20,7 @@ namespace Sheng.Enterprise.Web.Controllers
 
 		public ActionResult Index()
 		{
-			return base.View();
+			return View();
 		}
 
 		public ActionResult Post()
@@ -71,13 +29,13 @@ namespace Sheng.Enterprise.Web.Controllers
 			int weekOfYear = DateTimeHelper.GetWeekOfYear(DateTime.Now);
 			postViewModel.CurrentWeekOfYear = weekOfYear;
 			int year = DateTime.Now.Year;
-			string text = base.Request.QueryString["year"];
+			string text = Request.QueryString["year"];
 			if (!string.IsNullOrEmpty(text))
 			{
 				int.TryParse(text, out year);
 			}
 			int month = DateTime.Now.Month;
-			string text2 = base.Request.QueryString["month"];
+			string text2 = Request.QueryString["month"];
 			if (!string.IsNullOrEmpty(text2))
 			{
 				int.TryParse(text2, out month);
@@ -87,13 +45,13 @@ namespace Sheng.Enterprise.Web.Controllers
 				month = DateTime.Now.Month;
 			}
 			postViewModel.WeekList = DateTimeHelper.GetWeekListOfMonth(year, month);
-			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(base.Request.QueryString["week"], postViewModel.WeekList);
+			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(Request.QueryString["week"], postViewModel.WeekList);
 			postViewModel.Year = year;
 			postViewModel.Month = month;
 			postViewModel.WeekOfYear = weekOfYear2;
-			postViewModel.WorkTypeList = WeeklyReportController._settingsManager.GetUserWorkTypeList(base.UserContext.User.Id);
-			postViewModel.WorkTaskList = WeeklyReportController._settingsManager.GetWorkTaskList(base.UserContext.Domain.Id);
-			postViewModel.WorkStatusList = WeeklyReportController._settingsManager.GetWorkStatusList(base.UserContext.Domain.Id);
+			postViewModel.WorkTypeList = _settingsManager.GetUserWorkTypeList(UserContext.User.Id);
+			postViewModel.WorkTaskList = _settingsManager.GetWorkTaskList(UserContext.Domain.Id);
+			postViewModel.WorkStatusList = _settingsManager.GetWorkStatusList(UserContext.Domain.Id);
 			if (DateTime.Now.DayOfWeek == DayOfWeek.Monday)
 			{
 				postViewModel.ItemStartDate = DateTime.Now.AddDays(-7.0);
@@ -121,33 +79,28 @@ namespace Sheng.Enterprise.Web.Controllers
 			}
 			try
 			{
-				postViewModel.WeeklyReport = WeeklyReportController._weeklyReportManager.GetWeeklyReport(base.UserContext.User.Id, year, weekOfYear2);
+				postViewModel.WeeklyReport = _weeklyReportManager.GetWeeklyReport(UserContext.User.Id, year, weekOfYear2);
 			}
 			catch
 			{
-				return base.RedirectToAction("ErrorView", "Home");
+				return RedirectToAction("ErrorView", "Home");
 			}
-			if (weekOfYear == weekOfYear2 && base.UserContext.User.Notify)
+			if (weekOfYear == weekOfYear2 && UserContext.User.Notify)
 			{
-				if (postViewModel.WeeklyReport != null && postViewModel.WeeklyReport.ItemList != null)
+				if (postViewModel.WeeklyReport?.ItemList != null)
 				{
 					DateTime monday = DateTimeHelper.CalculateFirstDateOfWeek(DateTime.Now);
-					Func<WeeklyReportItem, bool> <>9__0;
 					while (monday.Day < DateTime.Now.Day)
 					{
-						IEnumerable<WeeklyReportItem> arg_308_0 = postViewModel.WeeklyReport.ItemList;
-						Func<WeeklyReportItem, bool> arg_308_1;
-						if ((arg_308_1 = <>9__0) == null)
-						{
-							arg_308_1 = (<>9__0 = ((WeeklyReportItem c) => c.Date.HasValue && c.Date.Value.Day == monday.Day));
-						}
-						if (arg_308_0.Where(arg_308_1).Count<WeeklyReportItem>() == 0)
+						IEnumerable<WeeklyReportItem> reportList = postViewModel.WeeklyReport.ItemList;
+						Func<WeeklyReportItem, bool> where = c=> c.Date.HasValue && c.Date.Value.Day == monday.Day;
+						if (!reportList.Where(where).Any())
 						{
 							postViewModel.Notify = true;
-							if (base.Session["Notify"] == null)
+							if (Session["Notify"] == null)
 							{
 								postViewModel.AlertNotify = true;
-								base.Session["Notify"] = true;
+								Session["Notify"] = true;
 								break;
 							}
 							break;
@@ -161,42 +114,33 @@ namespace Sheng.Enterprise.Web.Controllers
 				else if (DateTime.Now.DayOfWeek != DayOfWeek.Monday)
 				{
 					postViewModel.Notify = true;
-					if (base.Session["Notify"] == null)
+					if (Session["Notify"] == null)
 					{
 						postViewModel.AlertNotify = true;
-						base.Session["Notify"] = true;
+						Session["Notify"] = true;
 					}
 				}
 			}
-			if (WeeklyReportController.<>o__4.<>p__0 == null)
-			{
-				WeeklyReportController.<>o__4.<>p__0 = CallSite<Func<CallSite, object, int, object>>.Create(Binder.SetMember(CSharpBinderFlags.None, "CurrentWeekOfYear", typeof(WeeklyReportController), new CSharpArgumentInfo[]
-				{
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
-				}));
-			}
-			WeeklyReportController.<>o__4.<>p__0.Target(WeeklyReportController.<>o__4.<>p__0, base.ViewBag, DateTimeHelper.GetWeekOfYear(DateTime.Now));
-			return base.View(postViewModel);
+			return View(postViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_SearchByOrganization")]
 		public ActionResult SearchByOrganization()
 		{
 			SearchByOrganizationViewModel searchByOrganizationViewModel = new SearchByOrganizationViewModel();
-			string text = base.Request.QueryString["organizationId"];
+			string text = Request.QueryString["organizationId"];
 			if (string.IsNullOrEmpty(text))
 			{
-				searchByOrganizationViewModel.OrganizationId = base.UserContext.Organization.Id;
-				searchByOrganizationViewModel.OrganizationName = base.UserContext.Organization.Name;
+				searchByOrganizationViewModel.OrganizationId = UserContext.Organization.Id;
+				searchByOrganizationViewModel.OrganizationName = UserContext.Organization.Name;
 			}
 			else
 			{
-				Organization organization = WeeklyReportController._domainManager.GetOrganization(Guid.Parse(text));
+				Organization organization = _domainManager.GetOrganization(Guid.Parse(text));
 				if (organization == null)
 				{
-					searchByOrganizationViewModel.OrganizationId = base.UserContext.Organization.Id;
-					searchByOrganizationViewModel.OrganizationName = base.UserContext.Organization.Name;
+					searchByOrganizationViewModel.OrganizationId = UserContext.Organization.Id;
+					searchByOrganizationViewModel.OrganizationName = UserContext.Organization.Name;
 				}
 				else
 				{
@@ -207,13 +151,13 @@ namespace Sheng.Enterprise.Web.Controllers
 			int weekOfYear = DateTimeHelper.GetWeekOfYear(DateTime.Now);
 			searchByOrganizationViewModel.CurrentWeekOfYear = weekOfYear;
 			int year = DateTime.Now.Year;
-			string text2 = base.Request.QueryString["year"];
+			string text2 = Request.QueryString["year"];
 			if (!string.IsNullOrEmpty(text2))
 			{
 				int.TryParse(text2, out year);
 			}
 			int month = DateTime.Now.Month;
-			string text3 = base.Request.QueryString["month"];
+			string text3 = Request.QueryString["month"];
 			if (!string.IsNullOrEmpty(text3))
 			{
 				int.TryParse(text3, out month);
@@ -223,57 +167,48 @@ namespace Sheng.Enterprise.Web.Controllers
 				month = DateTime.Now.Month;
 			}
 			searchByOrganizationViewModel.WeekList = DateTimeHelper.GetWeekListOfMonth(year, month);
-			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(base.Request.QueryString["week"], searchByOrganizationViewModel.WeekList);
+			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(Request.QueryString["week"], searchByOrganizationViewModel.WeekList);
 			searchByOrganizationViewModel.Year = year;
 			searchByOrganizationViewModel.Month = month;
 			searchByOrganizationViewModel.WeekOfYear = weekOfYear2;
-			searchByOrganizationViewModel.WeeklyReportList = WeeklyReportController._weeklyReportManager.GetWeeklyReportListByOrganization(base.UserContext.Domain.Id, searchByOrganizationViewModel.OrganizationId, year, weekOfYear2);
-			if (WeeklyReportController.<>o__5.<>p__0 == null)
-			{
-				WeeklyReportController.<>o__5.<>p__0 = CallSite<Func<CallSite, object, int, object>>.Create(Binder.SetMember(CSharpBinderFlags.None, "CurrentWeekOfYear", typeof(WeeklyReportController), new CSharpArgumentInfo[]
-				{
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
-				}));
-			}
-			WeeklyReportController.<>o__5.<>p__0.Target(WeeklyReportController.<>o__5.<>p__0, base.ViewBag, DateTimeHelper.GetWeekOfYear(DateTime.Now));
-			return base.View(searchByOrganizationViewModel);
+			searchByOrganizationViewModel.WeeklyReportList = _weeklyReportManager.GetWeeklyReportListByOrganization(UserContext.Domain.Id, searchByOrganizationViewModel.OrganizationId, year, weekOfYear2);
+			return View(searchByOrganizationViewModel);
 		}
 
 		public ActionResult SearchByPersonal()
 		{
 			SearchByPersonalViewModel searchByPersonalViewModel = new SearchByPersonalViewModel();
-			string text = base.Request.QueryString["userId"];
+			string text = Request.QueryString["userId"];
 			if (string.IsNullOrEmpty(text))
 			{
-				searchByPersonalViewModel.UserId = base.UserContext.User.Id;
-				searchByPersonalViewModel.UserName = base.UserContext.User.Name;
+				searchByPersonalViewModel.UserId = UserContext.User.Id;
+				searchByPersonalViewModel.UserName = UserContext.User.Name;
 			}
 			else
 			{
 				searchByPersonalViewModel.UserId = Guid.Parse(text);
-				searchByPersonalViewModel.UserName = base.Request.QueryString["userName"];
+				searchByPersonalViewModel.UserName = Request.QueryString["userName"];
 			}
 			int year = DateTime.Now.Year;
-			string text2 = base.Request.QueryString["startYear"];
+			string text2 = Request.QueryString["startYear"];
 			if (!string.IsNullOrEmpty(text2))
 			{
 				int.TryParse(text2, out year);
 			}
 			int month = DateTime.Now.Month;
-			string text3 = base.Request.QueryString["startMonth"];
+			string text3 = Request.QueryString["startMonth"];
 			if (!string.IsNullOrEmpty(text3))
 			{
 				int.TryParse(text3, out month);
 			}
 			int year2 = DateTime.Now.Year;
-			string text4 = base.Request.QueryString["endYear"];
+			string text4 = Request.QueryString["endYear"];
 			if (!string.IsNullOrEmpty(text4))
 			{
 				int.TryParse(text4, out year2);
 			}
 			int month2 = DateTime.Now.Month;
-			string text5 = base.Request.QueryString["endMonth"];
+			string text5 = Request.QueryString["endMonth"];
 			if (!string.IsNullOrEmpty(text5))
 			{
 				int.TryParse(text5, out month2);
@@ -284,17 +219,8 @@ namespace Sheng.Enterprise.Web.Controllers
 			searchByPersonalViewModel.EndMonth = month2;
 			int weekOfYear = DateTimeHelper.GetWeekOfYear(DateTime.Now);
 			searchByPersonalViewModel.CurrentWeekOfYear = weekOfYear;
-			searchByPersonalViewModel.WeeklyReportList = WeeklyReportController._weeklyReportManager.GetWeeklyReportListByPerson(searchByPersonalViewModel.UserId, year, month, year2, month2);
-			if (WeeklyReportController.<>o__6.<>p__0 == null)
-			{
-				WeeklyReportController.<>o__6.<>p__0 = CallSite<Func<CallSite, object, int, object>>.Create(Binder.SetMember(CSharpBinderFlags.None, "CurrentWeekOfYear", typeof(WeeklyReportController), new CSharpArgumentInfo[]
-				{
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
-				}));
-			}
-			WeeklyReportController.<>o__6.<>p__0.Target(WeeklyReportController.<>o__6.<>p__0, base.ViewBag, DateTimeHelper.GetWeekOfYear(DateTime.Now));
-			return base.View(searchByPersonalViewModel);
+			searchByPersonalViewModel.WeeklyReportList = _weeklyReportManager.GetWeeklyReportListByPerson(searchByPersonalViewModel.UserId, year, month, year2, month2);
+			return View(searchByPersonalViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_SearchByWorkType")]
@@ -304,13 +230,13 @@ namespace Sheng.Enterprise.Web.Controllers
 			int weekOfYear = DateTimeHelper.GetWeekOfYear(DateTime.Now);
 			searchByWorkTypeViewModel.CurrentWeekOfYear = weekOfYear;
 			int year = DateTime.Now.Year;
-			string text = base.Request.QueryString["year"];
+			string text = Request.QueryString["year"];
 			if (!string.IsNullOrEmpty(text))
 			{
 				int.TryParse(text, out year);
 			}
 			int month = DateTime.Now.Month;
-			string text2 = base.Request.QueryString["month"];
+			string text2 = Request.QueryString["month"];
 			if (!string.IsNullOrEmpty(text2))
 			{
 				int.TryParse(text2, out month);
@@ -320,13 +246,13 @@ namespace Sheng.Enterprise.Web.Controllers
 				month = DateTime.Now.Month;
 			}
 			searchByWorkTypeViewModel.WeekList = DateTimeHelper.GetWeekListOfMonth(year, month);
-			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(base.Request.QueryString["week"], searchByWorkTypeViewModel.WeekList);
+			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(Request.QueryString["week"], searchByWorkTypeViewModel.WeekList);
 			searchByWorkTypeViewModel.Year = year;
 			searchByWorkTypeViewModel.Month = month;
 			searchByWorkTypeViewModel.WeekOfYear = weekOfYear2;
-			searchByWorkTypeViewModel.WorkTypeList = WeeklyReportController._settingsManager.GetUserWorkTypeList(base.UserContext.User.Id);
-			searchByWorkTypeViewModel.WorkTaskList = WeeklyReportController._settingsManager.GetWorkTaskList(base.UserContext.Domain.Id);
-			string text3 = base.Request.QueryString["workType"];
+			searchByWorkTypeViewModel.WorkTypeList = _settingsManager.GetUserWorkTypeList(UserContext.User.Id);
+			searchByWorkTypeViewModel.WorkTaskList = _settingsManager.GetWorkTaskList(UserContext.Domain.Id);
+			string text3 = Request.QueryString["workType"];
 			if (text3 == "null")
 			{
 				text3 = null;
@@ -336,7 +262,7 @@ namespace Sheng.Enterprise.Web.Controllers
 			{
 				workType = new Guid?(Guid.Parse(text3));
 			}
-			string text4 = base.Request.QueryString["workTask"];
+			string text4 = Request.QueryString["workTask"];
 			Guid? workTask = null;
 			if (!string.IsNullOrEmpty(text4))
 			{
@@ -344,22 +270,13 @@ namespace Sheng.Enterprise.Web.Controllers
 			}
 			if (workType.HasValue)
 			{
-				searchByWorkTypeViewModel.WeeklyReportList = WeeklyReportController._weeklyReportManager.GetWeeklyReportListByWorkType(base.UserContext.Domain.Id, workType, workTask, year, weekOfYear2);
+				searchByWorkTypeViewModel.WeeklyReportList = _weeklyReportManager.GetWeeklyReportListByWorkType(UserContext.Domain.Id, workType, workTask, year, weekOfYear2);
 			}
 			else
 			{
 				searchByWorkTypeViewModel.WeeklyReportList = new List<WeeklyReport>();
 			}
-			if (WeeklyReportController.<>o__7.<>p__0 == null)
-			{
-				WeeklyReportController.<>o__7.<>p__0 = CallSite<Func<CallSite, object, int, object>>.Create(Binder.SetMember(CSharpBinderFlags.None, "CurrentWeekOfYear", typeof(WeeklyReportController), new CSharpArgumentInfo[]
-				{
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
-				}));
-			}
-			WeeklyReportController.<>o__7.<>p__0.Target(WeeklyReportController.<>o__7.<>p__0, base.ViewBag, DateTimeHelper.GetWeekOfYear(DateTime.Now));
-			return base.View(searchByWorkTypeViewModel);
+			return View(searchByWorkTypeViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_Check")]
@@ -369,13 +286,13 @@ namespace Sheng.Enterprise.Web.Controllers
 			int weekOfYear = DateTimeHelper.GetWeekOfYear(DateTime.Now);
 			checkViewModel.CurrentWeekOfYear = weekOfYear;
 			int year = DateTime.Now.Year;
-			string text = base.Request.QueryString["year"];
+			string text = Request.QueryString["year"];
 			if (!string.IsNullOrEmpty(text))
 			{
 				int.TryParse(text, out year);
 			}
 			int month = DateTime.Now.Month;
-			string text2 = base.Request.QueryString["month"];
+			string text2 = Request.QueryString["month"];
 			if (!string.IsNullOrEmpty(text2))
 			{
 				int.TryParse(text2, out month);
@@ -385,46 +302,37 @@ namespace Sheng.Enterprise.Web.Controllers
 				month = DateTime.Now.Month;
 			}
 			checkViewModel.WeekList = DateTimeHelper.GetWeekListOfMonth(year, month);
-			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(base.Request.QueryString["week"], checkViewModel.WeekList);
+			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(Request.QueryString["week"], checkViewModel.WeekList);
 			checkViewModel.Year = year;
 			checkViewModel.Month = month;
 			checkViewModel.WeekOfYear = weekOfYear2;
-			string value = base.Request.QueryString["checkViewType"];
+			string value = Request.QueryString["checkViewType"];
 			CheckViewType checkViewType;
 			if (!string.IsNullOrEmpty(value) && Enum.TryParse<CheckViewType>(value, out checkViewType))
 			{
 				checkViewModel.CheckViewType = checkViewType;
 			}
-			checkViewModel.WeeklyReportList = WeeklyReportController._weeklyReportManager.GetWeeklyReportListForCheck(base.UserContext.Domain.Id, base.UserContext.User.Id, year, weekOfYear2, checkViewModel.CheckViewType);
-			if (WeeklyReportController.<>o__8.<>p__0 == null)
-			{
-				WeeklyReportController.<>o__8.<>p__0 = CallSite<Func<CallSite, object, int, object>>.Create(Binder.SetMember(CSharpBinderFlags.None, "CurrentWeekOfYear", typeof(WeeklyReportController), new CSharpArgumentInfo[]
-				{
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
-				}));
-			}
-			WeeklyReportController.<>o__8.<>p__0.Target(WeeklyReportController.<>o__8.<>p__0, base.ViewBag, DateTimeHelper.GetWeekOfYear(DateTime.Now));
-			return base.View(checkViewModel);
+			checkViewModel.WeeklyReportList = _weeklyReportManager.GetWeeklyReportListForCheck(UserContext.Domain.Id, UserContext.User.Id, year, weekOfYear2, checkViewModel.CheckViewType);
+			return View(checkViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_ReportByOrganization")]
 		public ActionResult ReportByOrganization()
 		{
 			ReportByOrganizationViewModel reportByOrganizationViewModel = new ReportByOrganizationViewModel();
-			string text = base.Request.QueryString["organizationId"];
+			string text = Request.QueryString["organizationId"];
 			if (string.IsNullOrEmpty(text))
 			{
-				reportByOrganizationViewModel.OrganizationId = base.UserContext.RootOrganization.Id;
-				reportByOrganizationViewModel.OrganizationName = base.UserContext.RootOrganization.Name;
+				reportByOrganizationViewModel.OrganizationId = UserContext.RootOrganization.Id;
+				reportByOrganizationViewModel.OrganizationName = UserContext.RootOrganization.Name;
 			}
 			else
 			{
-				Organization organization = WeeklyReportController._domainManager.GetOrganization(Guid.Parse(text));
+				Organization organization = _domainManager.GetOrganization(Guid.Parse(text));
 				if (organization == null)
 				{
-					reportByOrganizationViewModel.OrganizationId = base.UserContext.RootOrganization.Id;
-					reportByOrganizationViewModel.OrganizationName = base.UserContext.RootOrganization.Name;
+					reportByOrganizationViewModel.OrganizationId = UserContext.RootOrganization.Id;
+					reportByOrganizationViewModel.OrganizationName = UserContext.RootOrganization.Name;
 				}
 				else
 				{
@@ -433,25 +341,25 @@ namespace Sheng.Enterprise.Web.Controllers
 				}
 			}
 			int year = DateTime.Now.Year;
-			string text2 = base.Request.QueryString["startYear"];
+			string text2 = Request.QueryString["startYear"];
 			if (!string.IsNullOrEmpty(text2))
 			{
 				int.TryParse(text2, out year);
 			}
 			int month = DateTime.Now.Month;
-			string text3 = base.Request.QueryString["startMonth"];
+			string text3 = Request.QueryString["startMonth"];
 			if (!string.IsNullOrEmpty(text3))
 			{
 				int.TryParse(text3, out month);
 			}
 			int year2 = DateTime.Now.Year;
-			string text4 = base.Request.QueryString["endYear"];
+			string text4 = Request.QueryString["endYear"];
 			if (!string.IsNullOrEmpty(text4))
 			{
 				int.TryParse(text4, out year2);
 			}
 			int month2 = DateTime.Now.Month;
-			string text5 = base.Request.QueryString["endMonth"];
+			string text5 = Request.QueryString["endMonth"];
 			if (!string.IsNullOrEmpty(text5))
 			{
 				int.TryParse(text5, out month2);
@@ -460,36 +368,27 @@ namespace Sheng.Enterprise.Web.Controllers
 			reportByOrganizationViewModel.StartMonth = month;
 			reportByOrganizationViewModel.EndYear = year2;
 			reportByOrganizationViewModel.EndMonth = month2;
-			reportByOrganizationViewModel.Data = WeeklyReportController._weeklyReportManager.ReportByOrganization(base.UserContext.Domain.Id, reportByOrganizationViewModel.OrganizationId, year, month, year2, month2);
-			if (WeeklyReportController.<>o__9.<>p__0 == null)
-			{
-				WeeklyReportController.<>o__9.<>p__0 = CallSite<Func<CallSite, object, int, object>>.Create(Binder.SetMember(CSharpBinderFlags.None, "CurrentWeekOfYear", typeof(WeeklyReportController), new CSharpArgumentInfo[]
-				{
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
-				}));
-			}
-			WeeklyReportController.<>o__9.<>p__0.Target(WeeklyReportController.<>o__9.<>p__0, base.ViewBag, DateTimeHelper.GetWeekOfYear(DateTime.Now));
-			return base.View(reportByOrganizationViewModel);
+			reportByOrganizationViewModel.Data = _weeklyReportManager.ReportByOrganization(UserContext.Domain.Id, reportByOrganizationViewModel.OrganizationId, year, month, year2, month2);
+			return View(reportByOrganizationViewModel);
 		}
 
 		[AuthorizationFilter("WeeklyReport_ReportBySubmit")]
 		public ActionResult ReportBySubmit()
 		{
 			ReportBySubmitViewModel reportBySubmitViewModel = new ReportBySubmitViewModel();
-			string text = base.Request.QueryString["organizationId"];
+			string text = Request.QueryString["organizationId"];
 			if (string.IsNullOrEmpty(text))
 			{
-				reportBySubmitViewModel.OrganizationId = base.UserContext.RootOrganization.Id;
-				reportBySubmitViewModel.OrganizationName = base.UserContext.RootOrganization.Name;
+				reportBySubmitViewModel.OrganizationId = UserContext.RootOrganization.Id;
+				reportBySubmitViewModel.OrganizationName = UserContext.RootOrganization.Name;
 			}
 			else
 			{
-				Organization organization = WeeklyReportController._domainManager.GetOrganization(Guid.Parse(text));
+				Organization organization = _domainManager.GetOrganization(Guid.Parse(text));
 				if (organization == null)
 				{
-					reportBySubmitViewModel.OrganizationId = base.UserContext.RootOrganization.Id;
-					reportBySubmitViewModel.OrganizationName = base.UserContext.RootOrganization.Name;
+					reportBySubmitViewModel.OrganizationId = UserContext.RootOrganization.Id;
+					reportBySubmitViewModel.OrganizationName = UserContext.RootOrganization.Name;
 				}
 				else
 				{
@@ -500,13 +399,13 @@ namespace Sheng.Enterprise.Web.Controllers
 			int weekOfYear = DateTimeHelper.GetWeekOfYear(DateTime.Now);
 			reportBySubmitViewModel.CurrentWeekOfYear = weekOfYear;
 			int year = DateTime.Now.Year;
-			string text2 = base.Request.QueryString["year"];
+			string text2 = Request.QueryString["year"];
 			if (!string.IsNullOrEmpty(text2))
 			{
 				int.TryParse(text2, out year);
 			}
 			int month = DateTime.Now.Month;
-			string text3 = base.Request.QueryString["month"];
+			string text3 = Request.QueryString["month"];
 			if (!string.IsNullOrEmpty(text3))
 			{
 				int.TryParse(text3, out month);
@@ -516,21 +415,12 @@ namespace Sheng.Enterprise.Web.Controllers
 				month = DateTime.Now.Month;
 			}
 			reportBySubmitViewModel.WeekList = DateTimeHelper.GetWeekListOfMonth(year, month);
-			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(base.Request.QueryString["week"], reportBySubmitViewModel.WeekList);
+			int weekOfYear2 = DateTimeHelper.GetWeekOfYear(Request.QueryString["week"], reportBySubmitViewModel.WeekList);
 			reportBySubmitViewModel.Year = year;
 			reportBySubmitViewModel.Month = month;
 			reportBySubmitViewModel.WeekOfYear = weekOfYear2;
-			reportBySubmitViewModel.Data = WeeklyReportController._weeklyReportManager.ReportBySumbit(base.UserContext.Domain.Id, reportBySubmitViewModel.OrganizationId, year, weekOfYear2);
-			if (WeeklyReportController.<>o__10.<>p__0 == null)
-			{
-				WeeklyReportController.<>o__10.<>p__0 = CallSite<Func<CallSite, object, int, object>>.Create(Binder.SetMember(CSharpBinderFlags.None, "CurrentWeekOfYear", typeof(WeeklyReportController), new CSharpArgumentInfo[]
-				{
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.None, null),
-					CSharpArgumentInfo.Create(CSharpArgumentInfoFlags.UseCompileTimeType, null)
-				}));
-			}
-			WeeklyReportController.<>o__10.<>p__0.Target(WeeklyReportController.<>o__10.<>p__0, base.ViewBag, DateTimeHelper.GetWeekOfYear(DateTime.Now));
-			return base.View(reportBySubmitViewModel);
+			reportBySubmitViewModel.Data = _weeklyReportManager.ReportBySumbit(UserContext.Domain.Id, reportBySubmitViewModel.OrganizationId, year, weekOfYear2);
+			return View(reportBySubmitViewModel);
 		}
 	}
 }

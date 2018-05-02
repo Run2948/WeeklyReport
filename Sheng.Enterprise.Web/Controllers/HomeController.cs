@@ -15,42 +15,42 @@ namespace Sheng.Enterprise.Web.Controllers
 		public ActionResult Login()
 		{
 			LoginViewModel model = new LoginViewModel();
-			return base.View(model);
+			return View(model);
 		}
 
 		public ActionResult Logout()
 		{
-			SessionContainer.ClearUserContext(base.HttpContext);
-			return base.RedirectToAction("Login");
+			SessionContainer.ClearUserContext(HttpContext);
+			return RedirectToAction("Login");
 		}
 
 		[AllowedAnonymous]
 		public ActionResult Register()
 		{
 			RegisterViewModel model = new RegisterViewModel();
-			return base.View(model);
+			return View(model);
 		}
 
 		[AllowedAnonymous]
 		public ActionResult ResetPassword()
 		{
-			return base.View();
+			return View();
 		}
 
 		public ActionResult Introduction()
 		{
-			return base.View();
+			return View();
 		}
 
 		[AllowedAnonymous]
 		public ActionResult ErrorView()
 		{
-			return base.View();
+			return View();
 		}
 
 		public ActionResult Index()
 		{
-			return base.View();
+			return View();
 		}
 	}
 }

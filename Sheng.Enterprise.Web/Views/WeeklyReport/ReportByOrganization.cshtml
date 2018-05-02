@@ -1,0 +1,190 @@
+﻿@model Sheng.Enterprise.Web.Models.ReportByOrganizationViewModel
+
+@{
+    ViewBag.Title = "统计";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "周 报";
+    ViewBag.MainMenu = "WeeklyReport";
+    ViewBag.LeftMenu = "Report";
+}
+
+<script>
+
+    $(document).ready(function ()
+    {
+        //设置部门，默认设置为组织机构的根目录
+        setSelectedOrganization("organizationSelector", '@Model.OrganizationId', '@Model.OrganizationName');
+
+        $("#selectStartYear").val(@Model.StartYear);
+        $("#selectStartMonth").val(@Model.StartMonth);
+        $("#selectEndYear").val(@Model.EndYear);
+        $("#selectEndMonth").val(@Model.EndMonth);
+    });
+
+    function search()
+    {
+        layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        var organizationId = getSelectedOrganization("organizationSelector").Id;
+        var startYear = $("#selectStartYear").children('option:selected').val();
+        var startMonth = $("#selectStartMonth").children('option:selected').val();
+        var endYear = $("#selectEndYear").children('option:selected').val();
+        var endMonth = $("#selectEndMonth").children('option:selected').val();
+
+        window.location.href = "/WeeklyReport/ReportByOrganization?organizationId=" + organizationId
+            + "&startYear=" + startYear + "&startMonth=" + startMonth + "&endYear=" + endYear + "&endMonth=" + endMonth;
+    }
+
+   
+
+
+</script>
+
+    <div style="margin-right:20px; margin-bottom:20px;">
+        @Helpers.TitleWithDate("统计", this.ViewBag)
+        <div style="margin-top:20px">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="td_ContentTab_active">按组织架构</td>
+                    @if (AuthorizationHelper.Verify("WeeklyReport_ReportBySubmit", HttpContext.Current))
+                    {
+                        <td class="td_ContentTab">
+                            @Html.ActionLink("提交情况", "ReportBySubmit", "WeeklyReport", null, new { @class = "a_black_16" })
+                        </td>
+                    }
+                    <td>&nbsp;</td>
+                </tr>
+                <tr>
+                    <td colspan="3" bgcolor="#D4D4D4" height="1"></td>
+                </tr>
+            </table>
+
+        </div>
+        <div style="margin-top:20px; height:32px;">
+            <div style="float:left; line-height:32px;">
+                组织架构：
+            </div>
+            <div style="float:left; margin-left:20px;">
+                @Helpers.OrganizationSelector("organizationSelector", null, null, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name)
+            </div>
+        </div>
+
+        <div style="margin-top:20px; height:34px;">
+            <div style="float:left; line-height:34px; ">
+                时间：
+            </div>
+            <div style="float:left; line-height:34px;margin-left:20px;">
+                <select class="input_18" id="selectStartYear">
+                    @foreach (var item in ViewBag.YearList)
+                    {
+                        <option>@item</option>
+                    }
+                </select>
+            </div>
+            <div style="float:left; line-height:34px;margin-left:20px;">
+                <select class="input_18" id="selectStartMonth">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                    <option>9</option>
+                    <option>10</option>
+                    <option>11</option>
+                    <option>12</option>
+                </select>
+            </div>
+            <div style="float:left; line-height:34px;margin-left:20px;">
+                至
+            </div>
+            <div style="float:left; line-height:34px;margin-left:20px;">
+                <select class="input_18" id="selectEndYear">
+                    @foreach (var item in ViewBag.YearList)
+                    {
+                        <option>@item</option>
+                    }
+                </select>
+            </div>
+            <div style="float:left; line-height:34px;margin-left:20px;">
+                <select class="input_18" id="selectEndMonth">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                    <option>6</option>
+                    <option>7</option>
+                    <option>8</option>
+                    <option>9</option>
+                    <option>10</option>
+                    <option>11</option>
+                    <option>12</option>
+                </select>
+            </div>
+            <div style="float:left; line-height:34px;margin-left:20px;">
+                <input name="btnSearch" type="button" class="btn_blue" id="btnSearch" value="查询" onclick="search()" />
+            </div>
+        </div>
+
+        <div style="margin-top:30px;overflow:auto">
+            <table border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    @*<td width="150"><strong>部门</strong></td>*@
+                    <td width="120"><strong>姓名</strong></td>
+                    @*<td width="120"><strong>考核项1</strong></td>
+                    <td width="120"><strong>考核项2</strong></td>*@
+                    @if (Model.Data != null) 
+                    { 
+                        foreach (System.Data.DataColumn col in Model.Data.Columns)
+                        {
+                            if (col.ColumnName == "Name" || col.ColumnName == "Total")
+                            {
+                                continue;
+                            }
+                        
+                            @Html.Raw("<td width=\"120\"><strong>" + col.ColumnName + "</strong></td>");
+                        }
+                    }
+                    <td width="120"><strong>合计</strong></td>
+                </tr>
+                <tr>
+                    <td colspan="5" height="20"><div style="background:#D4D4D4; height:1px;"></div></td>
+                </tr>
+                @if (Model.Data != null)
+                {
+                    foreach (System.Data.DataRow dr in Model.Data.Rows)
+                    {
+                        <tr height="30">
+                            <td>@dr["Name"]</td>
+                            @foreach (System.Data.DataColumn col in Model.Data.Columns)
+                            {
+                                if (col.ColumnName == "Name" || col.ColumnName == "Total")
+                                {
+                                    continue;
+                                }
+
+                                @Html.Raw("<td>" + dr[col.ColumnName] + "</td>");
+                            }
+                            <td>@dr["Total"]</td>
+                        </tr>
+                    }
+                }
+                @*<tr>
+                    <td height="30">&nbsp;</td>
+                    <td><a href="#">张三</a></td>
+                    <td>90</td>
+                    <td>5</td>
+                    <td>95</td>
+                </tr>*@
+            </table>
+        </div>
+
+        <div>
+        </div>
+    </div>

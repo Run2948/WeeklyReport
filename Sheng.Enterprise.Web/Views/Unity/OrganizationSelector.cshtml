@@ -1,0 +1,174 @@
+﻿
+@{
+    ViewBag.Title = "OrganizationSelector";
+    Layout = "~/Views/Shared/_LayoutBasal.cshtml";
+}
+
+@Styles.Render("~/Content/zTreeStyle/zTreeStyle.css")
+@Scripts.Render("~/Scripts/ztree/jquery.ztree.core-3.5.min.js")
+
+<style type="text/css">
+    .ztree li span.button.switch.level0 {
+        visibility: hidden;
+        width: 1px;
+    }
+
+    .ztree li ul.level0 {
+        padding: 0;
+        background: none;
+    }
+</style>
+
+<script>
+
+    $(document).ready(function ()
+    {
+        loadOrganizationTree();
+    });
+
+    function loadOrganizationTree()
+    {
+        $.ajax({
+            url: "/Api/Domain/GetOrganizationList?domainId=" + '@ViewBag.Domain.Id',
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    var setting = {
+                        view: {
+                            dblClickExpand: false,
+                            showLine: true,
+                            selectedMulti: false
+                            //  fontCss: setFontCss
+                        },
+                        data: {
+                            key: {
+                                name: "Name"
+                            },
+                            simpleData: {
+                                enable: true,
+                                idKey: "Id",
+                                pIdKey: "Parent",
+                                rootPId: "@ViewBag.RootOrganization.Id"
+                            }
+                        }
+                    };
+
+                    var zNodes = new Array();
+
+                    @*var root = new Object();
+                    root.Id = '@ViewBag.Domain.Id';
+                    root.Parent = '';
+                    root.Name = '@ViewBag.Domain.Name';
+                    zNodes[0] = root;*@
+
+                    //var i = 1;
+                    var i = 0;
+                    $.each(data.Data, function (n, value)
+                    {
+                        var oranization = new Object();
+                        oranization.Id = value.Id;
+                        oranization.Parent = value.Parent;
+                        oranization.Name = value.Name;
+                        zNodes[i] = oranization;
+                        i++;
+                    });
+
+                    var treeObj = $.fn.zTree.init($("#tree"), setting, zNodes);
+                    treeObj.expandAll(true);
+                    var nodes = treeObj.getNodes();
+                    if (nodes.length > 0)
+                    {
+                        treeObj.selectNode(nodes[0]);
+                    }
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function selectOrganization(domId)
+    {
+        var treeObj = $.fn.zTree.getZTreeObj("tree");
+
+        var nodes = treeObj.getSelectedNodes();
+        if (nodes.length != 1)
+        {
+            var alertLayerIndex = layer.alert("请选择组织机构。", {
+                shade: [0.4, '#393D49'],
+                title: false,
+                closeBtn: false,
+                shift: _layerShift, success: function (layero, index)
+                {
+                    $(layero).focus();
+                    $(layero).keypress(function (e)
+                    {
+                        if (e.keyCode == 27)
+                        {
+                            layer.close(alertLayerIndex);
+                        }
+                    });
+                }
+            })
+            return;
+        }
+
+        var selectedNode = nodes[0];
+
+        parent.selectOrganization(getQueryString("domId"), selectedNode.Id, selectedNode.Name);
+        
+    }
+
+
+    function closeOrganizationSelector()
+    {
+        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+        parent.layer.close(index); //再执行关闭   
+    }
+
+</script>
+
+
+<table width="450" border="0" align="center" cellpadding="0" cellspacing="0">
+    <tr>
+        <td>
+            <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="100" valign="top">
+                        <div style="height:300px; overflow:auto">
+                            <ul id="tree" class="ztree"></ul>
+                        </div>
+
+                    </td>
+                </tr>
+            </table>
+            <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td height="50" align="right">
+                        <input type="button" class="btn_blue" value="确 定" onclick="selectOrganization();" />
+                        <input type="button" class="btn_blue" value="取 消" style="margin-left:1px;" onclick="closeOrganizationSelector()" />
+                    </td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+</table>

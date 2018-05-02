@@ -1,0 +1,21 @@
+﻿    <div class="leftMenuItem  @if(ViewBag.LeftMenu == "Post"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("填写", "Post", "WeeklyReport", null, new { @class = ViewBag.LeftMenu == "Post" ? "a_white_16" : "a_black_16" })
+    </div>
+
+ <div class="leftMenuItem  @if(ViewBag.LeftMenu == "Search"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("查询", "SearchByPersonal", "WeeklyReport", null, new { @class = ViewBag.LeftMenu == "Search" ? "a_white_16" : "a_black_16" })
+    </div>
+
+@if (AuthorizationHelper.Verify("WeeklyReport_Check", HttpContext.Current))
+{ 
+    <div class="leftMenuItem @if(ViewBag.LeftMenu == "Check"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("考核", "Check", "WeeklyReport", null, new { @class = ViewBag.LeftMenu == "Check" ? "a_white_16" : "a_black_16" })
+    </div>
+}
+
+@if (AuthorizationHelper.Verify("WeeklyReport_ReportBySubmit", HttpContext.Current))
+{
+    <div class="leftMenuItem @if(ViewBag.LeftMenu == "Report"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("统计", "ReportBySubmit", "WeeklyReport", null, new { @class = ViewBag.LeftMenu == "Report" ? "a_white_16" : "a_black_16" })
+    </div>
+}

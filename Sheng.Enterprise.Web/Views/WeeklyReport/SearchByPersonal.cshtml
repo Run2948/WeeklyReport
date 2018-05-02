@@ -1,0 +1,382 @@
+﻿@model Sheng.Enterprise.Web.Models.SearchByPersonalViewModel
+
+@{
+    ViewBag.Title = "查询";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "周 报";
+    ViewBag.MainMenu = "WeeklyReport";
+    ViewBag.LeftMenu = "Search";
+}
+
+<script>
+
+    $(document).ready(function () {
+
+
+        $("#chkSelectAll").change(function () {
+
+
+            if ($("#chkSelectAll").is(':checked')) {
+                $(".weeklyReportItem").each(function (index, element) {
+                    $(element).prop("checked", true);
+                })
+            } else {
+                $(".weeklyReportItem").each(function (index, element) {
+                    $(element).prop("checked", false);
+                })
+            }
+        });
+
+        $(".weeklyReportItem").change(function () {
+
+            var checkedCount = 0;
+            $(".weeklyReportItem").each(function (index, element) {
+                if ($(element).is(':checked')) {
+                    checkedCount++;
+                }
+            });
+
+            if($(".weeklyReportItem").length == checkedCount){
+                $("#chkSelectAll").prop("checked", true);
+            }else{
+                $("#chkSelectAll").prop("checked", false);
+            }
+
+        });
+
+        $("#selectStartYear").val(@Model.StartYear);
+        $("#selectEndYear").val(@Model.EndYear);
+
+        $("#selectStartYear").change(loadStartMonth);
+        $("#selectEndYear").change(loadEndMonth);
+
+        loadStartMonth();
+        loadEndMonth();
+
+        $("#selectStartMonth").val(@Model.StartMonth);
+        $("#selectEndMonth").val(@Model.EndMonth);
+    });
+
+    function loadStartMonth(){
+        $("#selectStartMonth").empty();
+        if($("#selectStartYear").val() == '@DateTime.Now.Year'){
+            for(i=1;i<=@DateTime.Now.Month;i++){
+                var optionObj = new Option(i, i, false, false);
+                document.getElementById("selectStartMonth").options.add(optionObj);
+            }
+
+        }else{
+            for(i=1;i<=12;i++){
+                var optionObj = new Option(i, i, false, false);
+                document.getElementById("selectStartMonth").options.add(optionObj);
+            }
+        }
+
+
+    }
+
+    function loadEndMonth(){
+        $("#selectEndMonth").empty();
+        if($("#selectEndYear").val() == '@DateTime.Now.Year'){
+            for(i=1;i<=@DateTime.Now.Month;i++){
+                var optionObj = new Option(i, i, false, false);
+                document.getElementById("selectEndMonth").options.add(optionObj);
+            }
+
+        }else{
+            for(i=1;i<=12;i++){
+                var optionObj = new Option(i, i, false, false);
+                document.getElementById("selectEndMonth").options.add(optionObj);
+            }
+        }
+
+        
+       
+    }
+
+    function search() {
+        layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        var userId = getSelectedPerson("personSelector").Id;
+        var userName = getSelectedPerson("personSelector").Name;
+        var startYear = $("#selectStartYear").children('option:selected').val();
+        var startMonth = $("#selectStartMonth").children('option:selected').val();
+        var endYear = $("#selectEndYear").children('option:selected').val();
+        var endMonth = $("#selectEndMonth").children('option:selected').val();
+
+        window.location.href = "/WeeklyReport/SearchByPersonal?userId=" + userId + "&userName=" + userName
+            + "&startYear=" + startYear + "&startMonth=" + startMonth + "&endYear=" + endYear + "&endMonth=" + endMonth;
+    }
+
+    function exportToExcel() {
+
+        var exportItemList = new Array();
+        var i = 0;
+        $(".weeklyReportItem").each(function (index, element) {
+            if ($(element).is(':checked')) {
+                var item = new Object();
+                item.Year = $(element).attr("year");
+                item.WeekOfYear = $(element).attr("weekofyear");
+                exportItemList[i] = item;
+                i++;
+            }
+        });
+
+        if(exportItemList.length==0){
+            layerAlert("请选择要下载的周报条目。");
+            return;
+        }
+
+        //startYear, startMonth, endYear, endMonth
+
+        var args = new Object();
+        args.User = '@Model.UserId';
+        args.StartYear = @Model.StartYear;
+        args.StartMonth = @Model.StartMonth;
+        args.EndYear = @Model.EndYear;
+        args.EndMonth = @Model.EndMonth;
+        args.ExportItemList = exportItemList;
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        $.ajax({
+            url: "/Api/WeeklyReport/ExportByPersonal",
+            data:JSON.stringify(args),
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                layer.close(layerIndex);
+                if(data.Success){
+                //    alert(JSON.stringify(data));
+
+                    window.location.href="/ExcelExport/" + data.Data;
+
+                }else{
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.close(layerIndex);
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+</script>
+
+<div style="margin-right:20px; margin-bottom:20px;">
+    @Helpers.TitleWithDate("查询", this.ViewBag)
+    <div style="margin-top:20px">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="td_ContentTab_active"><a href="#" class="a_black_16">按个人</a></td>
+                @if (AuthorizationHelper.Verify("WeeklyReport_SearchByOrganization", HttpContext.Current))
+                {
+                    <td class="td_ContentTab">
+                        @Html.ActionLink("按组织架构", "SearchByOrganization", "WeeklyReport", null, new { @class = "a_black_16" })
+                    </td>
+                }
+                @if (AuthorizationHelper.Verify("WeeklyReport_SearchByWorkType", HttpContext.Current))
+                {
+                    <td class="td_ContentTab">
+                        @Html.ActionLink("按项目", "SearchByWorkType", "WeeklyReport", null, new { @class = "a_black_16" })
+                    </td>
+                }
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="4" bgcolor="#D4D4D4" height="1"></td>
+            </tr>
+        </table>
+
+    </div>
+    <div style="margin-top:20px; height:34px;">
+        <div style="float:left; line-height:34px;">
+            人员：
+        </div>
+
+        @if (AuthorizationHelper.Verify("WeeklyReport_SearchByPerson", HttpContext.Current))
+        {
+            <div style="float:left; line-height:34px; margin-left:20px;">
+                @Helpers.PersonSelector("personSelector", Model.UserId.ToString(), Model.UserName, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name)
+            </div>
+        }
+        else
+        {
+            <div style="float:left; line-height:34px; margin-left:20px;">
+                @Helpers.PersonSelector("personSelector", Model.UserId.ToString(), Model.UserName, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name, false)
+            </div>
+        }
+
+        <div style="float:left; line-height:34px; margin-left:20px;">
+            时间：
+        </div>
+        <div style="float:left; line-height:34px;margin-left:20px;">
+            <select class="input_18" id="selectStartYear">
+                @foreach (var item in ViewBag.YearList)
+                {
+                    <option>@item</option>
+                }
+            </select>
+        </div>
+        <div style="float:left; line-height:34px;margin-left:20px;">
+            <select class="input_18" id="selectStartMonth">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                <option>7</option>
+                <option>8</option>
+                <option>9</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
+            </select>
+        </div>
+        <div style="float:left; line-height:34px;margin-left:20px;">
+            至
+        </div>
+        <div style="float:left; line-height:34px;margin-left:20px;">
+            <select class="input_18" id="selectEndYear">
+                @foreach (var item in ViewBag.YearList)
+                {
+                    <option>@item</option>
+                }
+            </select>
+        </div>
+        <div style="float:left; line-height:34px;margin-left:20px;">
+            <select class="input_18" id="selectEndMonth">
+                <option>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option>6</option>
+                <option>7</option>
+                <option>8</option>
+                <option>9</option>
+                <option>10</option>
+                <option>11</option>
+                <option>12</option>
+            </select>
+        </div>
+        <div style="float:left; line-height:34px;margin-left:20px;">
+            <input name="btnCreateChildOrganization" type="button" class="btn_blue" id="btnCreateChildOrganization" value="查询" onclick="search()" />
+            <input name="btnExportToExcel" type="button" class="btn_blue" id="btnExportToExcel" value="下载" onclick="exportToExcel()" />
+        </div>
+    </div>
+
+    <div>
+        
+        <div style="float:right">
+            <input type="checkbox" id="chkSelectAll"  /><label for="chkSelectAll">全选</label>
+        </div>
+        <div style="clear:both"></div>
+    </div>
+
+    @{
+        foreach (var weeklyReport in Model.WeeklyReportList)
+        {
+            if (weeklyReport.ItemList.Count == 0)
+            {
+                continue;
+            }
+
+            <div style="margin-top:20px;">
+                <div>
+                    <div>
+                        <div class="font_darkBlue_22" style="float:left">
+                            @Html.Raw(weeklyReport.Monday.ToString("MM/dd") + " - " + weeklyReport.Sunday.ToString("MM/dd") + (weeklyReport.WeekOfYear == Model.CurrentWeekOfYear ? "（本周）" : ""))
+                        </div>
+                        <div style="float:right">
+                            <input type="checkbox" class="weeklyReportItem" year="@weeklyReport.Year" weekofyear="@weeklyReport.WeekOfYear" />
+                        </div>
+                        <div style="clear:both"></div>
+                    </div>
+                    <div class="divSearchWeeklyReportContainer">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="Word-break: break-all">
+                            <tr>
+                                <td width="150"><strong>组别</strong></td>
+                                <td width="150"><strong>项目名称</strong></td>
+                                <td width="190"><strong>子项目</strong></td>
+                                <td><strong>工作内容</strong></td>
+                                <td width="110"><strong>完成情况</strong></td>
+                                <td width="110"><strong>日期</strong></td>
+                                @*<td width="150"><strong>备注</strong></td>*@
+                                @*<td width="50"><strong>用时</strong></td>*@
+                            </tr>
+                            <tr>
+                                <td colspan="7" height="20"><div style="background:#D4D4D4; height:1px;"></div></td>
+                            </tr>
+                            @foreach (var item in weeklyReport.ItemList)
+                            {
+                                <tr>
+                                    <td class="tdSearchWeeklyReportItem">@item.OrganizationName</td>
+                                    <td class="tdSearchWeeklyReportItem">@item.WorkTypeName</td>
+                                    <td class="tdSearchWeeklyReportItem">@item.WorkTaskName</td>
+                                    <td class="tdSearchWeeklyReportItem">@Html.Raw(item.Content)</td>
+                                    <td class="tdSearchWeeklyReportItem">@item.StatusName</td>
+                                    <td class="tdSearchWeeklyReportItem">@if (item.Date.HasValue) {@item.Date.Value.ToString("yyyy-MM-dd") }</td>
+                                    @*<td class="tdSearchWeeklyReportItem">@item.Time</td>*@
+                                    @*<td class="tdSearchWeeklyReportItem">@Html.Raw(item.Remark)</td>*@
+                                </tr>
+                            }
+                        </table>
+
+                        @if (weeklyReport.Checked)
+                        {
+                            <div id="divCheckResult" style=" margin-top:20px;">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                        <td>已阅</td>
+                                    </tr>
+                                    @*<tr>
+                                        <td valign="top">
+                                            <div>
+                                                @foreach (var item in weeklyReport.CheckPointList)
+                                                {
+                                                    <div style="float:left; line-height:34px;margin-right:20px;">
+                                                        @item.CheckPointName：@item.CheckPointItemName（@item.Score）
+                                                    </div>
+                                                }
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @if (String.IsNullOrEmpty(weeklyReport.CheckRemark) == false)
+                                    {
+                                        <tr>
+                                            <td valign="bottom" height="10"></td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                                    <tr>
+                                                        <td width="100">审核意见：</td>
+                                                        <td>@weeklyReport.CheckRemark</td>
+                                                    </tr>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    }*@
+                                </table>
+                            </div>
+                        }
+
+                    </div>
+                </div>
+            </div>
+
+
+        }
+    }
+
+    <div>
+    </div>
+</div>

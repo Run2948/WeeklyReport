@@ -1,0 +1,385 @@
+﻿@model Sheng.Enterprise.Web.Models.UserViewModel
+
+@{
+    ViewBag.Title = "人员";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "设 置";
+    ViewBag.MainMenu = "Settings";
+    ViewBag.LeftMenu = "User";
+}
+
+@Styles.Render("~/Content/zTreeStyle/zTreeStyle.css")
+@Scripts.Render("~/Scripts/ztree/jquery.ztree.core-3.5.min.js")
+
+<style type="text/css">
+    .ztree li span.button.switch.level0 {
+        visibility: hidden;
+        width: 1px;
+    }
+
+    .ztree li ul.level0 {
+        padding: 0;
+        background: none;
+    }
+</style>
+
+<script language="javascript">
+
+    var _treeObj;
+
+
+    //当前页
+    var _currentPage = 1;
+
+    $(document).ready(function ()
+    {
+        initTable();
+
+        loadOrganizationTree();
+
+    });
+
+
+    function scrollHeader()
+    {
+        // alert(mydiv.scrollLeft);
+        var ml = 0 - mydiv.scrollLeft;
+        document.getElementById("tableHeader").style.cssText = "margin-left:" + ml + "px;";
+    }
+
+    function loadOrganizationTree()
+    {
+        var setting = {
+            view: {
+                dblClickExpand: false,
+                showLine: true,
+                selectedMulti: false
+                //  fontCss: setFontCss
+            },
+            data: {
+                key: {
+                    name: "Name"
+                },
+                simpleData: {
+                    enable: true,
+                    idKey: "Id",
+                    pIdKey: "Parent",
+                    rootPId: "@ViewBag.Domain.Id"
+                }
+            },
+            callback: {
+                onClick: zTreeOnClick
+            }
+        };
+
+        var zNodes = new Array();
+
+        @*var root = new Object();
+        root.Id = '@ViewBag.Domain.Id';
+        root.Parent = '';
+        root.Name = '@ViewBag.Domain.Name';
+        zNodes[0] = root;*@
+
+        //var i = 1;
+        var i = 0;
+        @foreach (var item in Model.OrganizationList)
+        {
+            <text>
+        var oranization = new Object();
+        oranization.Id = '@item.Id';
+        oranization.Parent = '@item.Parent';
+        oranization.Name = '@item.Name';
+        zNodes[i] = oranization;
+        i++;
+            </text>
+        }
+
+        _treeObj = $.fn.zTree.init($("#tree"), setting, zNodes);
+        _treeObj.expandAll(true);
+        var nodes = _treeObj.getNodes();
+        if (nodes.length > 0)
+        {
+            _treeObj.selectNode(nodes[0]);
+            selectNode(nodes[0]);
+        }
+    }
+
+    function zTreeOnClick(event, treeId, treeNode)
+    {
+        selectNode(treeNode);
+    }
+
+    function selectNode(treeNode)
+    {
+        //getUserList(treeNode.Id);
+        getUserList();
+    }
+
+    function getUserList(targetPage) {
+        var treeNode = getSelectedNode();
+        if (treeNode == null)
+            return;
+
+        var organizationId = treeNode.Id;
+
+        var args = new Object();
+        args.Page = targetPage || 1;
+        //args.PageSize = 2;
+        args.OrganizationId = organizationId;
+        args.Name = $("#txtName").val();
+        args.SearchOrganization = $("#selectSearchOrganization").val();
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        //http://www.jb51.net/article/48943.htm
+        //$('#tableUser tr:gt(1)').remove();
+
+        $.ajax({
+            url: "/Api/User/GetUserList",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(args),
+            success: function (data, status, jqXHR) {
+                //  alert(data);
+                layer.close(layerIndex);
+
+                if (data.Success) {
+                    //$.each(data.Data.UserList, function (n, value)
+                    //{
+                    //    addUserRow(value);
+                    //});
+
+                    //      alert(JSON.stringify(data));
+
+                    var resultObj = data.Data;
+
+                    _currentPage = resultObj.Page;
+
+                    //alert(JSON.stringify(resultObj));
+                    var gettpl = document.getElementById('tableTemplate').innerHTML;
+                    laytpl(gettpl).render(resultObj.ItemList, function (html) {
+                        document.getElementById('divTableBodyContainer').innerHTML = html;
+                        fitTable();
+                    });
+
+                    laypage({
+                        skin: 'yahei',
+                        cont: document.getElementById('divPagingContainer'),
+                        pages: resultObj.TotalPage, //总页数
+                        curr: resultObj.Page, //当前页
+                        groups: 7, //连续显示分页数
+                        jump: function (obj, first) {
+                            if (!first) { //点击跳页触发函数自身，并传递当前页：obj.curr
+                                getUserList(obj.curr);
+                            }
+                        }
+                    });
+
+                } else {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.close(layerIndex);
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+
+    function addUserRow(user)
+    {
+        var table = document.getElementById("tableBody");
+        var newRow = table.insertRow();
+
+        var tdNumber = newRow.insertCell();
+        tdNumber.height = 35;
+        if (user.Number != undefined && user.Number != "")
+        {
+            tdNumber.innerHTML = user.Number;
+        }
+
+        var tdName = newRow.insertCell();
+        tdName.innerHTML = "<a href='/Settings/UserDetail?id=" + user.Id + "'>" + user.Name + "</a>";
+
+        var tdJobTitle = newRow.insertCell();
+        if (user.JobTitleName!=null)
+            tdJobTitle.innerHTML = user.JobTitleName;
+
+        var tdJobLevel = newRow.insertCell();
+        if (user.JobLevelName != null)
+            tdJobLevel.innerHTML = user.JobLevelName;
+
+        //var tdExtTelphone = newRow.insertCell();
+        //if (user.ExtTelphone != undefined && user.ExtTelphone != "")
+        //{
+        //    tdExtTelphone.innerHTML = user.ExtTelphone;
+        //}
+
+    }
+
+    //重新加载数据后要再次调用，因为加载数据前会把所有的行都清除掉
+    //就包括第一行（设置了宽度值的行）
+    function initTable()
+    {
+        //初始化表格
+        $("#tableBody").width($("#tableHeader").width());
+        $("#tableHeader tr:first").each(function (n, value)
+        {
+            $(this).find("td").each(function (n, value)
+            {
+                $("#tableBody tr:first td:eq(" + n + ")").width(value.width)
+            });
+        });
+    }
+
+    function scrollHeader() {
+        // alert(divTableBodyContainer.scrollLeft);
+        var ml = 0 - divTableBodyContainer.scrollLeft;
+        document.getElementById("tableHeader").style.cssText = "margin-left:" + ml + "px;";
+    }
+
+    function fitTable() {
+        $("#tableBody").width($("#tableHeader").width());
+
+        $("#tableHeader tr:first").each(function (n, value) {
+            $(this).find("td").each(function (n, value) {
+                $("#tableBody tr:first td:eq(" + n + ")").width(value.width)
+            });
+        });
+    }
+    
+    function getSelectedNode() {
+        var nodes = _treeObj.getSelectedNodes();
+        if (nodes.length != 1)
+            return null;
+
+        return nodes[0];
+    }
+
+    function selectPerson(id, name) {
+
+        window.location.href = "/Settings/UserDetail?id=" + id;
+    }
+
+</script>
+
+<script id="tableTemplate" type="text/html">
+
+    <table id="tableBody" border="0" cellspacing="0" cellpadding="0">
+        {{# for(var i = 0, len = d.length; i < len; i++){ }}
+
+        <tr>
+            <td height="35">{{ d[i].Account }}</td>
+            <td><a href="javascript:void(0)" onclick="selectPerson('{{ d[i].Id }}','{{ d[i].Name }}')">{{ d[i].Name }}</a></td>
+            <td>
+                {{# if(d[i].OrganizationName != null){ }}
+                {{d[i].OrganizationName}}
+                {{# } }}
+            </td>
+            <td >
+                {{# if(d[i].JobTitleName != null){ }}
+                {{d[i].JobTitleName}}
+                {{# } }}
+            </td>
+            <td >
+                {{# if(d[i].JobLevelName != null){ }}
+                {{d[i].JobLevelName}}
+                {{# } }}
+            </td>
+           
+        </tr>
+
+        {{# } }}
+
+    </table>
+
+</script>
+
+
+<div id="divContent">
+    <div id="divContainerTitle">人员</div>
+
+    <div style="margin-top:20px;">
+        <div style="float:left;line-height:30px;">
+            <b>查询</b>
+        </div>
+        <div style="float:left;line-height:30px;margin-left:20px;">
+            <span>姓名：</span>
+            <input class="input_16" style="width:100px;" id="txtName" />
+        </div>
+        <div style="float:left;line-height:30px;margin-left:20px;">
+            <span>组织机构：</span>
+            <select class="input_16" style="width:170px;" id="selectSearchOrganization">
+                <option value="0">当前选中及下级</option>
+                <option value="1">仅当前选中</option>
+            </select>
+        </div>
+        <div style="float:left; margin-left:20px;">
+            <input name="btnCreateChildOrganization" type="button" class="btn_blue" id="btnCreateChildOrganization" value="查询" onclick="getUserList()" />
+        </div>
+        <div style="clear:both"></div>
+    </div>
+
+    <div style=" position:absolute; top:110px; bottom:0px;left:20px;width:240px; OVERFLOW :auto; ">
+        <div class="zTreeDemoBackground left">
+            <ul id="tree" class="ztree"></ul>
+        </div>
+    </div>
+
+
+    <div style=" position:absolute; top:110px; bottom:0px;left:280px;right:20px;OVERFLOW-Y: auto;">
+        <div>
+            <input name="btnCreate" type="button" class="btn_blue" id="btnCreate" value="新增人员" onclick="goUrl('@Url.Action("UserDetail")')" /><span class="font_lightGray_15" style="margin-left:30px;"></span>
+        </div>
+
+        <div style="position:absolute; top:55px; bottom:60px;left:0px; right:0px ;OVERFLOW-Y: hidden; ">
+            @*<div style="overflow:hidden; height:30px">
+
+                <table id="tableHeader" border="0" cellspacing="0" cellpadding="0" width="760">
+                    <tr class="font_black_16_b">
+                        <td width="130">工号</td>
+                        <td width="130">姓名</td>
+                        <td width="200">职位</td>
+                        <td width="150">职级</td>
+                        <td width="150">分机</td>
+                    </tr>
+                </table>
+
+            </div>*@
+            <div style="overflow:hidden; padding-left:20px;" class="tableHeader">
+                <table id="tableHeader" border="0" cellspacing="0" cellpadding="0" width="760" height="47">
+                    <tr class="font_black_16_b">
+                        <td width="130">账号</td>
+                        <td width="130">姓名</td>
+                        <td width="150">部门</td>
+                        <td width="200">职位</td>
+                        <td width="150">职级</td>
+                    </tr>
+                </table>
+            </div>
+            <div style="margin-top:5px;margin-bottom:5px; background-color:#ccc; height:1px"></div>
+
+            <div id="divTableBodyContainer" style="overflow:auto; height:100%; padding-left:20px;" onscroll="scrollHeader()">
+                <!--table必须要有一个确切的宽度，否则无法超出div-->
+
+
+            </div>
+
+           
+
+           
+        </div>
+
+
+        <div id="divPagingContainer" style=" position:absolute; left:0px;right:0px; bottom:10px; height:35px;">
+
+        </div>
+    </div>
+
+</div>
+

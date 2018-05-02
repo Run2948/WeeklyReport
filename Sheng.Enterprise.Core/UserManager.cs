@@ -36,26 +36,20 @@ namespace Sheng.Enterprise.Core
 			{
 				return null;
 			}
-			List<CommandParameter> list = new List<CommandParameter>();
-			list.Add(new CommandParameter("@account", account));
-			list.Add(new CommandParameter("@password", password));
-			List<User> list2 = this._dataBase.Select<User>("SELECT * FROM [User] WHERE [Account] = @account AND [Password] = @password AND [Removed] =0", list);
-			if (list2.Count != 1)
-			{
-				return null;
-			}
-			return list2[0];
+
+		    List<CommandParameter> list = new List<CommandParameter>
+		    {
+		        new CommandParameter("@account", account),
+		        new CommandParameter("@password", password)
+		    };
+		    List<User> list2 = this._dataBase.Select<User>("SELECT * FROM [User] WHERE [Account] = @account AND [Password] = @password AND [Removed] = 0", list);
+			return list2.Count != 1 ? null : list2[0];
 		}
 
 		public User GetUser(Guid id)
 		{
-			User user = new User();
-			user.Id = id;
-			if (this._dataBase.Fill<User>(user))
-			{
-				return user;
-			}
-			return null;
+		    User user = new User {Id = id};
+		    return this._dataBase.Fill<User>(user) ? user : null;
 		}
 
 		public UserDataWrapper GetUserDataWrapper(Guid id)
@@ -100,11 +94,13 @@ namespace Sheng.Enterprise.Core
 				}
 				Domain domain = new Domain();
 				UserManager._domainManager.Create(domain);
-				Organization organization = new Organization();
-				organization.Id = domain.Id;
-				organization.Domain = domain.Id;
-				organization.Name = args.DomainName;
-				UserManager._domainManager.CreateOrganization(organization);
+			    Organization organization = new Organization
+			    {
+			        Id = domain.Id,
+			        Domain = domain.Id,
+			        Name = args.DomainName
+			    };
+			    UserManager._domainManager.CreateOrganization(organization);
 				User user = new User
 				{
 					Account = args.Account,
@@ -117,14 +113,15 @@ namespace Sheng.Enterprise.Core
 					Notify = true
 				};
 				this._dataBase.Insert(user);
-				Dictionary<string, object> dictionary = new Dictionary<string, object>();
-				dictionary.Add("Domain", domain.Id);
-				WorkType workType = this._dataBase.Select<WorkType>(dictionary)[0];
-				UserWorkType userWorkType = new UserWorkType();
-				userWorkType.Domain = domain.Id;
-				userWorkType.User = user.Id;
-				userWorkType.WorkType = workType.Id;
-				this._dataBase.Insert(userWorkType);
+			    Dictionary<string, object> dictionary = new Dictionary<string, object> {{"Domain", domain.Id}};
+			    WorkType workType = this._dataBase.Select<WorkType>(dictionary)[0];
+			    UserWorkType userWorkType = new UserWorkType
+			    {
+			        Domain = domain.Id,
+			        User = user.Id,
+			        WorkType = workType.Id
+			    };
+			    this._dataBase.Insert(userWorkType);
 				userRegisterResult.User = user;
 				userRegisterResult.Domain = domain;
 			}

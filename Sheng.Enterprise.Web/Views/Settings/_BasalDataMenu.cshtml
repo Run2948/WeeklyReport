@@ -1,0 +1,36 @@
+﻿<div @if (ViewBag.BasalData == "JobTitle") { @Html.Raw("class='font_gray_18'")    }
+     style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px; @if (ViewBag.BasalData == "JobTitle") { @Html.Raw("background-color:#D8E6ED;")  } ">
+    @if (ViewBag.BasalData == "JobTitle")
+    {
+        @Html.Raw("职位");
+    }
+    else
+    {
+        @Html.ActionLink("职位", "JobTitle", null, new { @class = "a_gray_18" });
+    }
+</div>
+
+<div @if (ViewBag.BasalData == "JobLevel") { @Html.Raw("class='font_gray_18'")  } 
+     style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px; @if (ViewBag.BasalData == "JobLevel") { @Html.Raw("background-color:#D8E6ED;")  } ">
+    @if (ViewBag.BasalData == "JobLevel")
+    { 
+        @Html.Raw("职级");
+    }
+    else
+    {
+        @Html.ActionLink("职级", "JobLevel", null, new { @class = "a_gray_18"});
+    }
+</div>
+
+<div @if (ViewBag.BasalData == "OfficeLocation") { @Html.Raw("class='font_gray_18'")   }
+     style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px; @if (ViewBag.BasalData == "OfficeLocation") { @Html.Raw("background-color:#D8E6ED;")  } ">
+    @if (ViewBag.BasalData == "OfficeLocation")
+    {
+        @Html.Raw("办公地点");
+    }
+    else
+    {
+        @Html.ActionLink("办公地点", "OfficeLocation", null, new { @class = "a_gray_18" });
+    }
+</div>
+

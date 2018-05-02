@@ -22,16 +22,16 @@ namespace Sheng.Enterprise.Web.Areas.Api.Controllers
 			weeklyReport.Sunday = sunday;
 			if (weeklyReport.ItemList != null)
 			{
-				foreach (WeeklyReportItem expr_77 in weeklyReport.ItemList)
+				foreach (WeeklyReportItem item in weeklyReport.ItemList)
 				{
-					expr_77.Domain = base.UserContext.Domain.Id;
-					expr_77.WeeklyReport = weeklyReport.Id;
-					expr_77.User = weeklyReport.User;
-					expr_77.Year = weeklyReport.Year;
-					expr_77.Month = weeklyReport.Month;
-					expr_77.WeekOfYear = weeklyReport.WeekOfYear;
-					expr_77.Monday = weeklyReport.Monday;
-					expr_77.Sunday = weeklyReport.Sunday;
+					item.Domain = base.UserContext.Domain.Id;
+					item.WeeklyReport = weeklyReport.Id;
+					item.User = weeklyReport.User;
+					item.Year = weeklyReport.Year;
+					item.Month = weeklyReport.Month;
+					item.WeekOfYear = weeklyReport.WeekOfYear;
+					item.Monday = weeklyReport.Monday;
+					item.Sunday = weeklyReport.Sunday;
 				}
 			}
 			WeeklyReportController._weeklyReportManager.Post(weeklyReport);

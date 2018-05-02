@@ -1,0 +1,277 @@
+﻿@model Sheng.Enterprise.Web.Models.ReportBySubmitViewModel
+@{
+    ViewBag.Title = "统计";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "周 报";
+    ViewBag.MainMenu = "WeeklyReport";
+    ViewBag.LeftMenu = "Report";
+}
+
+<script>
+
+    $(document).ready(function () {
+        //设置部门，默认设置为组织机构的根目录
+        setSelectedOrganization("organizationSelector", '@Model.OrganizationId', '@Model.OrganizationName');
+
+        $("#selectYear").val(@Model.Year);
+        $("#selectMonth").val(@Model.Month);
+
+        $('#selectYear').change(function () {
+            search();
+        });
+        $('#selectMonth').change(function () {
+            search();
+        });
+
+        //在打开的iframe中修改了organizationSelector后，虽然这边能响应
+        //但是无法执行  window.location.href ，提示没有权限
+        //$("#organizationSelector").change(function ()
+        //{
+        //    search();
+        //});
+
+        switchTab("divNotSubmited", $("#tabHeaderUser"));
+
+    });
+
+    function search() {
+        layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        var organizationId = getSelectedOrganization("organizationSelector").Id;
+        var year = $("#selectYear").val();
+        var month = $("#selectMonth").children('option:selected').val();
+        var week = '@Model.WeekOfYear';
+        window.location.href = "/WeeklyReport/ReportBySubmit?year=" + year + "&month=" + month
+            + "&week=" + week + "&organizationId=" + organizationId;
+    }
+
+    function switchWeek(week) {
+        layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        var organizationId = getSelectedOrganization("organizationSelector").Id;
+        var year = $("#selectYear").val();
+        var month = $("#selectMonth").children('option:selected').val();
+        window.location.href = "/WeeklyReport/ReportBySubmit?year=" + year + "&month=" + month
+            + "&week=" + week + "&organizationId=" + organizationId;
+    }
+
+    function switchTab(tabitem, header) {
+        // alert(tabitem);
+        // alert($("#divTab .tabitem").length);
+
+        $("#divTab .tabitem").each(function (index, element) {
+            if ($(element).attr("id") == tabitem) {
+                $(element).show();
+            } else {
+                $(element).hide();
+            }
+        });
+
+        $("#divTabHeader div").each(function (index, element) {
+            $(element).attr("class", "divTab_ContentTab");
+        });
+
+        $(header).parent().attr("class", "divTab_ContentTab_active");
+
+    }
+
+
+</script>
+<div style="margin-right:20px;margin-bottom:20px;">
+    @Helpers.TitleWithDate("提交情况", this.ViewBag)
+    <div style="margin-top:20px">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                @*@if (AuthorizationHelper.Verify("WeeklyReport_ReportByOrganization", HttpContext.Current))
+                    {
+                        <td class="td_ContentTab">
+                            @Html.ActionLink("按组织架构", "ReportByOrganization", "WeeklyReport", null, new { @class = "a_black_16" })
+                        </td>
+                    }*@
+                <td class="td_ContentTab_active">提交情况</td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="4" bgcolor="#D4D4D4" height="1"></td>
+            </tr>
+        </table>
+    </div>
+    <div style="margin-top:20px; height:32px;">
+        <div style="float:left; line-height:32px;">
+            组织架构：
+        </div>
+        <div style="float:left; margin-left:20px;">
+            @Helpers.OrganizationSelector("organizationSelector", null, null, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name)
+        </div>
+        <div style="float:left; line-height:34px;margin-left:20px;">
+            <input name="btnSearch" type="button" class="btn_blue" id="btnSearch" value="查询" onclick="search()" />
+        </div>
+    </div>
+    <div style="height:50px;background:#D8E6ED; margin-top:20px;">
+        <div style="float:left; margin-left:20px; margin-right:20px">
+            <table border="0" cellspacing="0" cellpadding="0" height="50">
+                <tr>
+                    <td>
+                        <select id="selectYear" class="input_18">
+                            @foreach (var item in ViewBag.YearList)
+                            {
+                                <option>@item</option>
+                            }
+                        </select>
+                    </td>
+                    <td width="15">
+                        &nbsp;
+
+                    </td>
+                    <td>
+                        <select id="selectMonth" class="input_18">
+
+                            @if (Model.Year == DateTime.Now.Year)
+                            {
+                                for (int i = 1; i < 12; i++)
+                                {
+                                    if (i > DateTime.Now.Month)
+                                    {
+                                        break;
+                                    }
+
+                                    <option>@i</option>
+                                }
+                            }
+                            else
+                            {
+                                <option>1</option>
+                                <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    <option>10</option>
+                                    <option>11</option>
+                                    <option>12</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        @*<div class="weekTab">
+                <a href="#">6/29 - 7/5</a>
+            </div>
+            <div class="weekTab">
+                <a href="#">7/6 - 7/12</a>
+            </div>
+            <div class="weekTab weekTab_active">
+                7/13 - 7/19
+            </div>
+            <div class="weekTab">
+                <a href="#">7/20 - 7/26 </a>
+            </div>
+            <div class="weekTab">
+                <a href="#">7/27 - 8/6</a>
+            </div>*@
+        @foreach (var item in Model.WeekList)
+        {
+            if (Model.Year == DateTime.Now.Year && item.WeekOfYear > Model.CurrentWeekOfYear)
+            {
+                break;
+            }
+
+            <div class="weekTab  @if (item.WeekOfYear == Model.WeekOfYear)
+            {
+                    @Html.Raw("weekTab_active")
+            }">
+                @if (item.WeekOfYear == Model.WeekOfYear)
+                {
+                    @Html.Raw(item.Monday.ToString("MM/dd") + " - " + item.Sunday.ToString("MM/dd") + (Model.Year == DateTime.Now.Year && item.WeekOfYear == Model.CurrentWeekOfYear ? "（本周）" : ""))
+                }
+                else
+                {
+                    @Html.Raw("<a href='javascript:void(0);' onclick=\"switchWeek(\'" + item.WeekOfYear + "\')\">" + item.Monday.ToString("MM/dd") + " - " + item.Sunday.ToString("MM/dd") + (Model.Year == DateTime.Now.Year && item.WeekOfYear == Model.CurrentWeekOfYear ? "（本周）" : "") + "</a>");
+                }
+            </div>
+        }
+    </div>
+    <div id="divTab">
+        <div style="margin-top:20px;">
+            <div id="divTabHeader" style="height: 40px;">
+                <div class="divTab_ContentTab_active">
+                    <a id="tabHeaderAuthorization" class="a_gray_16" href="javascript:void(0)" onclick="switchTab('divSubmited',this)">已提交</a>
+                </div>
+                <div class="divTab_ContentTab">
+                    <a id="tabHeaderUser" class="a_gray_16" href="javascript:void(0)" onclick="switchTab('divNotSubmited',this)">未提交</a>
+                </div>
+            </div>
+            <div style="height: 1px; background-color: #D4D4D4;">
+            </div>
+        </div>
+        <div class="tabitem" id="divSubmited" style="">
+            @{
+                int submitedCount = 0;
+                <div style="margin:20px;">
+                    <table width="400" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="100" height="30"><b>姓名</b></td>
+                            <td><b>部门</b></td>
+                        </tr>
+                        @foreach (System.Data.DataRow dr in Model.Data.Rows)
+                        {
+
+                            if (dr["WeeklyReportId"] != null && dr["WeeklyReportId"].ToString() != String.Empty)
+                            {
+                                submitedCount++;
+                                <tr>
+                                    <td height="25">@dr["Name"]</td>
+                                    <td>@dr["OrganizationName"]</td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+                <div style="margin:20px;font-weight:bold">
+                    总数：@submitedCount
+            </div>
+            }
+        </div>
+        <div class="tabitem" id="divNotSubmited" style="">
+            @{
+                int notSubmitedCount = 0;
+                <div style="margin:20px;">
+                    <table width="400" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="100" height="30"><b>姓名</b></td>
+                            <td><b>部门</b></td>
+                        </tr>
+                        @foreach (System.Data.DataRow dr in Model.Data.Rows)
+                        {
+
+                            if (dr["WeeklyReportId"] == null || dr["WeeklyReportId"].ToString() == String.Empty)
+                            {
+                                notSubmitedCount++;
+                                <tr>
+                                    <td height="25">@dr["Name"]</td>
+                                    <td>@dr["OrganizationName"]</td>
+                                </tr>
+                            }
+                        }
+                    </table>
+                </div>
+                <div style="margin:20px;font-weight:bold">
+                    总数：@notSubmitedCount
+                </div>
+            }
+
+           
+        </div>
+    </div>
+    <div>
+    </div>
+</div>

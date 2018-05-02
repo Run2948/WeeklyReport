@@ -1,0 +1,373 @@
+﻿@model Sheng.Enterprise.Web.Models.OfficeLocationViewModel
+
+@{
+    ViewBag.Title = "办公地点";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "设 置";
+    ViewBag.MainMenu = "Settings";
+    ViewBag.LeftMenu = "BasalData";
+    ViewBag.BasalData = "OfficeLocation";
+}
+
+
+<script type="text/javascript">
+
+    var _createDivHtml;
+
+    var _mode = "create";//modify
+
+    $(document).ready(function ()
+    {
+        _createDivHtml = $("#divEdit").html();
+        $("#divEdit").html("");
+    });
+
+    function create()
+    {
+        showEditDiv();
+    }
+
+    function showEditDiv()
+    {
+        _mode = "create";
+
+        var title;
+        title = "新增";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['500px', '190px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift:_layerShift,
+            content: _createDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        $("#tableEdit").find("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                save();
+            }
+        });
+
+        $("#btnRemove").hide();
+
+        $("#txtName").focus();
+
+    }
+
+    function modifyOfficeLocation(id, name)
+    {
+        _mode = "modify";
+
+        var title;
+        title = "修改";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['500px', '190px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift:_layerShift,
+            content: _createDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        $("#tableEdit").find("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                save();
+            }
+        });
+
+        $("#btnRemove").show();
+
+        $("#txtName").focus();
+
+        $("#txtId").val(id);
+        $("#txtName").val(name);
+    }
+
+    function closeAllLayer()
+    {
+        layer.closeAll();
+    }
+
+    function save()
+    {
+        if ($("#formCreate").validate({
+            rules: {
+                "txtName": "required"
+        },
+            messages: {
+                "txtName": "!"
+        }
+        }).form() == false)
+        {
+            return;
+        }
+
+        if (_mode == "create")
+        {
+            createSave();
+        }
+        else
+        {
+            modifySave();
+        }
+    }
+
+    function removeOfficeLocation()
+    {
+        var id = $("#txtId").val();
+        if (id == undefined || id == "")
+        {
+            return;
+        }
+
+        var msg = "是否确认删除？"
+
+        var index = layer.confirm(msg, {
+            btn: ['确认', '取消'], //按钮
+            shade: [0.4, '#393D49'],
+            title: false,
+            closeBtn: false,
+            shift:_layerShift
+        }, function ()
+        {
+            $("#divEditMask").show();
+            layer.close(index);
+
+            $.ajax({
+                url: "/Api/Settings/RemoveOfficeLocation?id=" + id,
+                type: "POST",
+                dataType: "json",
+                success: function (data, status, jqXHR)
+                {
+                    layer.closeAll();
+
+                    if (data.Success)
+                    {
+                        removeRow(id);
+
+                    } else
+                    {
+                        layerAlert(data.Message);
+                    }
+                },
+                error: function (xmlHttpRequest)
+                {
+                    layer.closeAll();
+
+                    alert("Error: " + xmlHttpRequest.status);
+                }
+            });
+        });
+    }
+
+    function createSave()
+    {
+
+        $("#divEditMask").show();
+
+        var officeLocation = new Object();
+
+        officeLocation.Domain = '@Model.Domain.Id';
+        officeLocation.Name = $("#txtName").val();
+
+        $.ajax({
+            url: "/Api/Settings/CreateOfficeLocation",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(officeLocation),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    officeLocation.Id = data.Data.Id;
+
+                    addRow(officeLocation);
+
+                    closeAllLayer();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function modifySave()
+    {
+        $("#divEditMask").show();
+
+        var officeLocation = new Object();
+
+        officeLocation.Id = $("#txtId").val();
+        officeLocation.Domain = '@Model.Domain.Id';
+        officeLocation.Name = $("#txtName").val();
+
+        $.ajax({
+            url: "/Api/Settings/UpdateOfficeLocation",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(officeLocation),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    updateRow(officeLocation);
+
+                    closeAllLayer();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function addRow(officeLocation)
+    {
+        var table = document.getElementById("tableBody");
+        var newRow = table.insertRow();
+
+        $(newRow).attr("id", "tr_" + officeLocation.Id);
+
+        var tdName = newRow.insertCell();
+        tdName.height = 40;
+        tdName.innerHTML = "<a href='javascript:void(0)'  class='a_blue_15' onclick=\"modifyOfficeLocation('" + officeLocation.Id + "','" + officeLocation.Name + "')\">" + officeLocation.Name + "</a>";
+    }
+
+    function updateRow(officeLocation)
+    {
+        var innerHTML = "<td height='40'><a href='javascript:void(0)'  class='a_blue_15' onclick=\"modifyOfficeLocation('" + officeLocation.Id + "','" + officeLocation.Name + "')\">" + officeLocation.Name + "</a></td>";
+        $("#tr_" + officeLocation.Id).html(innerHTML);
+    }
+
+    function removeRow(id)
+    {
+        $("#tr_" + id).remove();
+    }
+
+
+</script>
+<div id="divContent">
+    <div id="divContainerTitle">基础数据</div>
+
+    <div style=" position:absolute; top:70px; bottom:0px;left:20px;width:200px; OVERFLOW :auto; ">
+        @Html.Partial("_BasalDataMenu")
+    </div>
+
+    <div style=" position:absolute; top:70px; bottom:10px;left:220px;width:1px; background-color:#D4D4D4">
+    </div>
+</div>
+
+
+<div style=" position:absolute; top:70px; bottom:0px;left:260px;right:20px;OVERFLOW-Y: auto;">
+    <div style="margin-left:20px;">
+        <input name="btnCreateChildOrganization" type="button" class="btn_blue" id="btnCreateChildOrganization" value="新 增" onclick="create()" />
+        <span class="font_lightGray_15" style="margin-left:30px;"></span>
+    </div>
+
+    <div style="position:absolute; top:50px; bottom:60px;left:0px; right:0px ;OVERFLOW-Y: hidden; ">
+
+        <div style="margin-top:5px; background-color:#ccc; height:1px"></div>
+
+        <div style="position:absolute;bottom:0px; top:20px; left:20px; right:20px; overflow:auto">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" id="tableBody">
+                @foreach (var item in Model.OfficeLocationList)
+                {
+                    <tr id="tr_@item.Id">
+                        <td height="40"><a href="javascript:void(0)" class="a_blue_15" onclick="modifyOfficeLocation('@item.Id','@item.Name')">@item.Name</a></td>
+                    </tr>
+                }
+            </table>
+        </div>
+
+    </div>
+
+
+    <div id="divPagingContainer" style=" position:absolute; left:0px;right:0px; bottom:10px; height:35px;">
+
+    </div>
+</div>
+
+
+<div id="divEdit" style="display:none">
+    <div id="divEditMask" style=" display:none; position:absolute;top:0px;right:0px;bottom:0px;left:0px;background-color:white">
+        <div style="margin-left:30px;margin-top:20px;">请稍候...</div>
+    </div>
+    <table width="100%" style="padding-left:30px;padding-right:20px;" border="0" align="center" cellpadding="0" cellspacing="0" id="tableEdit">
+        <tr>
+            <td>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <!--如果不加 return false，按回车时页面会刷新-->
+                <form id="formCreate" onsubmit="return false;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="100" height="50">名称：</td>
+                            <td>
+                                <input type="hidden" name="txtId" id="txtId">
+                                <input name="txtName" type="text" class="input_18" style="width:300px;" id="txtName" maxlength="50" keyenter /> *
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="130" height="50"><input name="btnRemove" type="button" class="btn_red" id="btnRemove" value="删 除" onclick="removeOfficeLocation()" style="display:none" /></td>
+                        <td align="right">
+                            <input name="btnEditSave" type="button" class="btn_blue" id="btnEditSave" value="保 存" onclick="save()" />
+                            <input name="btnEditCancel" type="button" class="btn_blue" id="btnEditCancel" value="取 消" style="margin-left:1px;" onclick="closeAllLayer()" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</div>

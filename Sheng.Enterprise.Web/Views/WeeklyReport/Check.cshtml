@@ -1,0 +1,438 @@
+﻿@model Sheng.Enterprise.Web.Models.CheckViewModel
+
+@{
+    ViewBag.Title = "考核";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "周 报";
+    ViewBag.MainMenu = "WeeklyReport";
+    ViewBag.LeftMenu = "Check";
+}
+
+<script>
+
+    $(document).ready(function ()
+    {
+        $("#selectYear").val(@Model.Year);
+        $("#selectMonth").val(@Model.Month);
+
+        $('#selectYear').change(function ()
+        {
+            search();
+        });
+        $('#selectMonth').change(function ()
+        {
+            search();
+        });
+
+        heartbeat();
+    });
+
+    function search()
+    {
+        layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        var year = $("#selectYear").val();
+        var month = $("#selectMonth").children('option:selected').val();
+        var week = '@Model.WeekOfYear';
+        var checkViewType = '@((int)Model.CheckViewType)';
+        window.location.href = "/WeeklyReport/Check?year=" + year + "&month=" + month
+            + "&week=" + week + "&checkViewType=" + checkViewType;
+    }
+
+    function switchWeek(week)
+    {
+        layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        var year = $("#selectYear").val();
+        var month = $("#selectMonth").children('option:selected').val();
+        var checkViewType = '@((int)Model.CheckViewType)';
+        window.location.href = "/WeeklyReport/Check?year=" + year + "&month=" + month
+            + "&week=" + week + "&checkViewType=" + checkViewType;
+    }
+
+    function switchType(checkViewType)
+    {
+        layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        var year = $("#selectYear").val();
+        var month = $("#selectMonth").children('option:selected').val();
+        var week = '@Model.WeekOfYear';
+        window.location.href = "/WeeklyReport/Check?year=" + year + "&month=" + month
+            + "&week=" + week + "&checkViewType=" + checkViewType;
+    }
+
+    function check(weeklyReportId,userId)
+    {
+        var checkResult = new Object();
+
+        checkResult.WeeklyReport = weeklyReportId;
+        checkResult.Domain = '@ViewBag.Domain.Id';
+        checkResult.User = userId;
+        checkResult.Year = @Model.Year;
+        checkResult.Month = @Model.Month;
+        checkResult.WeekOfYear = @Model.WeekOfYear;
+
+
+        checkResult.CheckPointList = new Array();
+
+        var i = 0;
+        $("#checkPointContainer_" + weeklyReportId).find("select").each(function (n, value)
+        {
+            var itemId = $(value).attr("checkPoint");
+            var value = $(value).find("option:selected").val();
+
+            checkResult.CheckPointList[i] = new Object();
+            checkResult.CheckPointList[i].CheckPoint = itemId;
+            checkResult.CheckPointList[i].Value = value;
+
+            i++;
+
+        });
+
+        //var checkRemark = $("#checkRemark_" + weeklyReportId).val();
+        //checkResult.Remark = checkRemark;
+
+        checkResult.Remark = "";
+
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        $.ajax({
+            url: "/Api/WeeklyReport/Check",
+            data: JSON.stringify(checkResult),
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR)
+            {
+                layer.closeAll();
+                hideMask();
+
+                if (data.Success)
+                {
+                    $("#divSearchWeeklyReportContainer_" + weeklyReportId).attr("class","divSearchWeeklyReportContainer_blue");
+                    $("#btnCheck_" + weeklyReportId).hide();
+                    $("#btnUncheck_" + weeklyReportId).show();
+
+                    layer.msg('考核成功', {
+                        time: 1000
+                    });
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                layer.closeAll();
+                hideMask();
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function uncheck(weeklyReportId)
+    {
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        $.ajax({
+            url: "/Api/WeeklyReport/Uncheck?id=" + weeklyReportId,
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR)
+            {
+                layer.closeAll();
+                hideMask();
+
+                if (data.Success)
+                {
+                    $("#divSearchWeeklyReportContainer_" + weeklyReportId).attr("class","divSearchWeeklyReportContainer");
+                    $("#btnCheck_" + weeklyReportId).show();
+                    $("#btnUncheck_" + weeklyReportId).hide();
+
+                    $("#checkPointContainer_" + weeklyReportId).find("div").each(function (n, value)
+                    {
+                        $(value).show();
+                    });
+
+                    layer.msg("考核已撤销。", {
+                        time: 1000
+                    });
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                layer.closeAll();
+                hideMask();
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+</script>
+
+<div style="margin-right:20px; margin-bottom:20px;">
+    @Helpers.TitleWithDate("考核", this.ViewBag)
+    <div style="height:50px;background:#D8E6ED; margin-top:20px;">
+        <div style="float:left; margin-left:20px; margin-right:20px">
+            <table border="0" cellspacing="0" cellpadding="0" height="50">
+                <tr>
+                    <td>
+                        <select id="selectYear" class="input_18">
+                            @foreach (var item in ViewBag.YearList)
+                            {
+                                <option>@item</option>
+                            }
+                        </select>
+                    </td>
+                    <td width="15">
+                        &nbsp;
+
+                    </td>
+                    <td>
+                        <select id="selectMonth" class="input_18">
+
+                            @if (Model.Year == DateTime.Now.Year)
+                            {
+                                for (int i = 1; i < 12; i++)
+                                {
+                                    if (i > DateTime.Now.Month)
+                                    {
+                                        break;
+                                    }
+
+                                    <option>@i</option>
+                                }
+                            }
+                            else
+                            {
+                                <option>1</option>
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                    <option>5</option>
+                                    <option>6</option>
+                                    <option>7</option>
+                                    <option>8</option>
+                                    <option>9</option>
+                                    <option>10</option>
+                                    <option>11</option>
+                                    <option>12</option>
+                            }
+                        </select>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        @*<div class="weekTab">
+                <a href="#">6/29 - 7/5</a>
+            </div>
+            <div class="weekTab">
+                <a href="#">7/6 - 7/12</a>
+            </div>
+            <div class="weekTab weekTab_active">
+                7/13 - 7/19
+            </div>
+            <div class="weekTab">
+                <a href="#">7/20 - 7/26 </a>
+            </div>
+            <div class="weekTab">
+                <a href="#">7/27 - 8/6</a>
+            </div>*@
+        @foreach (var item in Model.WeekList)
+            {
+                if (Model.Year == DateTime.Now.Year && item.WeekOfYear > Model.CurrentWeekOfYear)
+                {
+                    break;
+                }
+
+                <div class="weekTab  @if (item.WeekOfYear == Model.WeekOfYear)
+                {
+                    @Html.Raw("weekTab_active")
+                }">
+                    @if (item.WeekOfYear == Model.WeekOfYear)
+                    {
+                        @Html.Raw(item.Monday.ToString("MM/dd") + " - " + item.Sunday.ToString("MM/dd") + (Model.Year == DateTime.Now.Year && item.WeekOfYear == Model.CurrentWeekOfYear ? "（本周）" : ""))
+                    }
+                    else
+                    {
+                        @Html.Raw("<a href='javascript:void(0);' onclick=\"switchWeek(\'" + item.WeekOfYear + "\')\">" + item.Monday.ToString("MM/dd") + " - " + item.Sunday.ToString("MM/dd") + (Model.Year == DateTime.Now.Year && item.WeekOfYear == Model.CurrentWeekOfYear ? "（本周）" : "") + "</a>");
+                    }
+                </div>
+        }
+    </div>
+
+    @if (Model.WeeklyReportList.Count == 0)
+    {
+        <div id="divMessage" class="div_red" style=" margin:10px; margin-top:20px;">
+            您没有需要考核的人员或当前没有周报需要考核，若要设置被考核人，请到设置功能下设置。
+        </div>
+    }
+
+    <div style="margin-top:20px">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="@if(Model.CheckViewType == Sheng.Enterprise.Infrastructure.CheckViewType.All){
+                                   @Html.Raw("td_ContentTab_active")
+                               }else{
+                                   @Html.Raw("td_ContentTab")
+                               }">
+                    <a href="#" class="a_black_16" onclick="switchType('2')">全部</a>
+                </td>
+                <td class="@if(Model.CheckViewType == Sheng.Enterprise.Infrastructure.CheckViewType.Checked){
+                                   @Html.Raw("td_ContentTab_active")
+                               }else{
+                                   @Html.Raw("td_ContentTab")
+                               }">
+                    <a href="#" class="a_black_16" onclick="switchType('1')">已阅</a>
+                </td>
+                <td class="@if(Model.CheckViewType == Sheng.Enterprise.Infrastructure.CheckViewType.Unchecked){
+                                   @Html.Raw("td_ContentTab_active")
+                               }else{
+                                   @Html.Raw("td_ContentTab")
+                               }">
+                    <a href="#" class="a_black_16" onclick="switchType('0')">未阅</a>
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="4" bgcolor="#D4D4D4" height="1"></td>
+            </tr>
+        </table>
+
+    </div>
+
+    @{
+        foreach (var weeklyReport in Model.WeeklyReportList)
+        {
+            if (weeklyReport.ItemList.Count == 0)
+            {
+                continue;
+            }
+
+            <div style="margin-top:30px;">
+                <div>
+                    <div class="font_darkBlue_22">
+                        @weeklyReport.UserName
+                    </div>
+                    <div id="divSearchWeeklyReportContainer_@weeklyReport.Id" class="@if (weeklyReport.Checked) { @Html.Raw("divSearchWeeklyReportContainer_blue"); }
+                            else {
+                                @Html.Raw("divSearchWeeklyReportContainer"); }">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="Word-break: break-all">
+                            <tr>
+                                <td width="150"><strong>组别</strong></td>
+                                <td width="150"><strong>项目名称</strong></td>
+                                <td width="190"><strong>子项目</strong></td>
+                                <td><strong>工作内容</strong></td>
+                                <td width="110"><strong>完成情况</strong></td>
+                                <td width="110"><strong>日期</strong></td>
+                                @*<td width="150"><strong>备注</strong></td>*@
+                                @*<td width="50"><strong>用时</strong></td>*@
+                            </tr>
+                            <tr>
+                                <td colspan="7" height="20"><div style="background:#D4D4D4; height:1px;"></div></td>
+                            </tr>
+                            @foreach (var item in weeklyReport.ItemList)
+                            {
+                                <tr>
+                                    <td class="tdSearchWeeklyReportItem">@item.OrganizationName</td>
+                                    <td class="tdSearchWeeklyReportItem">@item.WorkTypeName</td>
+                                    <td class="tdSearchWeeklyReportItem">@item.WorkTaskName</td>
+                                    <td class="tdSearchWeeklyReportItem">@Html.Raw(item.Content)</td>
+                                    <td class="tdSearchWeeklyReportItem">@item.StatusName</td>
+                                    <td class="tdSearchWeeklyReportItem">@if (item.Date.HasValue) {@item.Date.Value.ToString("yyyy-MM-dd") }</td>
+                                    @*<td class="tdSearchWeeklyReportItem">@Html.Raw(item.Remark)</td>*@
+                                    @*<td class="tdSearchWeeklyReportItem">@item.Time</td>*@
+                                </tr>
+                            }
+                        </table>
+
+                    </div>
+                </div>
+
+                <div style="margin-top:20px;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td valign="top">
+                                @*<div id="checkPointContainer_@weeklyReport.Id">
+                                    @foreach (var checkPoint in Model.CheckPointList)
+                                    {
+                                        <div style="float:left; line-height:34px;margin-right:20px;">
+                                            <div style="float:left; line-height:34px;">
+                                                @checkPoint.Name：
+                                            </div>
+                                            <div style="float:left; line-height:34px;margin-left:10px; @{
+                                                    if (weeklyReport.Checked) {
+                                                    var targetcheckPoint = (from c in weeklyReport.CheckPointList where c.CheckPoint == checkPoint.Id select c).ToList();
+                                                    if (targetcheckPoint.Count == 0)
+                                                    {
+                                                       @Html.Raw("display:none")
+                                                    }
+                                                    }}">
+                                                <select class="input_16" checkPoint="@checkPoint.Id">
+                                                    @foreach (var checkPointItem in from c in Model.CheckPointItemList
+                                                                                   where
+                                                c.CheckPoint == checkPoint.Id
+                                                                                   select c)
+                                                    {
+                                                        <option value="@checkPointItem.Id" @{ var targetcheckPoint = (from c in weeklyReport.CheckPointList where c.CheckPoint == checkPoint.Id select c).ToList(); if (targetcheckPoint.Count == 1) { if (targetcheckPoint[0].Value == checkPointItem.Id) { @Html.Raw("selected")  } } }>@checkPointItem.Name （@checkPointItem.Score）</option>
+    }
+                                                </select>
+                                            </div>
+                                        </div>
+    }
+                                </div>*@
+                            </td>
+                            <td width="100" rowspan="3" align="right" valign="bottom">
+
+                                <input id="btnUncheck_@weeklyReport.Id" name="btnUncheck_@weeklyReport.Id" type="button" class="btn_red" value="撤销" onclick="uncheck('@weeklyReport.Id')"
+                                       @if (weeklyReport.Checked == false) { @Html.Raw("style='display:none'")  } />
+
+                                <input id="btnCheck_@weeklyReport.Id" name="btnCheck_@weeklyReport.Id" type="button" class="btn_blue" value="已阅" onclick="check('@weeklyReport.Id','@weeklyReport.User')"
+                                       @if (weeklyReport.Checked) { @Html.Raw("style='display:none'")  } />
+
+                            </td>
+                        </tr>
+                        @*<tr>
+                                <td valign="bottom" height="10"></td>
+                            </tr>
+                            <tr>
+                                <td valign="top">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                        <tr>
+                                            <td width="100">审核意见：</td>
+                                            <td><input type="text" class="input_16" id="checkRemark_@weeklyReport.Id" value="@weeklyReport.CheckRemark" /></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>*@
+                    </table>
+
+                </div>
+            </div>
+
+
+    }
+    }
+
+    <div>
+    </div>
+</div>

@@ -1,0 +1,947 @@
+﻿@model Sheng.Enterprise.Web.Models.RoleViewModel
+
+@{
+    ViewBag.Title = "Role";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "设 置";
+    ViewBag.MainMenu = "Settings";
+    ViewBag.LeftMenu = "Role";
+}
+
+<style type="text/css">
+    .authorizationItem {
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
+</style>
+
+<script>
+
+    var _createDivHtml;
+
+    var _mode = "create";//modify
+
+    $(document).ready(function ()
+    {
+        _createDivHtml = $("#divEdit").html();
+        $("#divEdit").html("");
+
+        switchTab("divAuthorizationTabItem", $("#tabHeaderAuthorization"));
+
+        switchFirstRole();
+    });
+
+    function switchFirstRole()
+    {
+        var firstDiv = $("#divRoleList div:first-child");
+        if (firstDiv.length == 0)
+        {
+            $("#divTab").hide();
+            return;
+        }
+       
+        var roleId = $(firstDiv).attr("roleid")
+
+        switchRole(roleId);
+    }
+
+    function create()
+    {
+        _mode = "create";
+
+        var title;
+        title = "新增";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['500px', '190px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift: _layerShift,
+            content: _createDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        $("#tableEdit").find("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                save();
+            }
+        });
+
+        $("#btnRemove").hide();
+
+        $("#txtName").focus();
+    }
+
+    function modify()
+    {
+        if ($("#txtRoleId").val() == "")
+        {
+            layerMsg("请选择要修改的角色。");
+            return;
+        }
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        $.ajax({
+            url: "/Api/Settings/GetRole?id=" + $("#txtRoleId").val(),
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR)
+            {
+                layer.close(layerIndex);
+
+                if (data.Success)
+                {
+                    _mode = "modify";
+
+                    var title;
+                    title = "修改";
+
+                    var layerIndex = layer.open({
+                        type: 1,
+                        area: ['500px', '190px'], //宽高
+                        closeBtn: false,
+                        title: title,
+                        shift: _layerShift,
+                        content: _createDivHtml,
+                        success: function (layero, index)
+                        {
+                            $(layero).focus();
+                            $(layero).keypress(function (e)
+                            {
+                                if (e.keyCode == 27)
+                                {
+                                    layer.close(layerIndex);
+                                }
+                            });
+                        }
+                    });
+
+                    $("#tableEdit").find("[keyenter]").keypress(function (e)
+                    {
+                        if (e.keyCode == 13)
+                        {
+                            save();
+                        }
+                    });
+
+                    $("#txtId").val($("#txtRoleId").val());
+                    $("#txtName").val(data.Data.Name);
+
+                    $("#btnRemove").show();
+
+                    $("#txtName").focus();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function removeData()
+    {
+        if ($("#txtRoleId").val() == "")
+        {
+            layerMsg("请选择要删除的角色。");
+            return;
+        }
+
+        layer.confirm("是否确定删除该角色？", { title: false, closeBtn: false, shift: _layerShift }, function (index)
+        {
+            layer.closeAll();
+
+            var layerIndex = layer.load(0, {
+                shade: [0.2, '#fff']
+            });
+
+            $.ajax({
+                url: "/Api/Settings/RemoveRole?id=" + $("#txtRoleId").val(),
+                type: "POST",
+                dataType: "json",
+                success: function (data, status, jqXHR)
+                {
+                    layer.close(layerIndex);
+
+                    if (data.Success)
+                    {
+                        $("#divRoleList div[roleid=" + $("#txtRoleId").val() + "]").remove();
+
+                        //当前权限清除掉
+                        $("#divAuthorization [rolekey]").each(function (index, element)
+                        {
+                            $(element).removeAttr("checked");
+                        });
+
+                        //把当前人清除掉
+                        $('#tableStaff tr:gt(1)').remove();
+
+                        $("#txtRoleId").val("");
+
+                        switchFirstRole();
+                    }
+                    else
+                    {
+                        layerAlert(data.Message);
+                    }
+                },
+                error: function (xmlHttpRequest)
+                {
+                    layer.close(layerIndex);
+
+                    alert("Error: " + xmlHttpRequest.status);
+                }
+            });
+        });
+    }
+
+    function save()
+    {
+        if ($("#formCreate").validate({
+            rules: {
+                "txtName": "required"
+        },
+            messages: {
+                "txtName": "!"
+        }
+        }).form() == false)
+        {
+            return;
+        }
+
+        if (_mode == "create")
+        {
+            createSave();
+        }
+        else
+        {
+            modifySave();
+        }
+    }
+
+    function createSave()
+    {
+        $("#divEditMask").show();
+
+        var role = new Object();
+
+        role.Name = $("#txtName").val();
+
+        $.ajax({
+            url: "/Api/Settings/CreateRole",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(role),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    role.Id = data.Data.Id;
+
+                    addRow(role);
+
+                    closeAllLayer();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function modifySave()
+    {
+        $("#divEditMask").show();
+
+        var role = new Object();
+
+        role.Id = $("#txtId").val();
+        role.Name = $("#txtName").val();
+
+        $.ajax({
+            url: "/Api/Settings/UpdateRole",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(role),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    updateRow(role);
+
+                    closeAllLayer();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function addRow(role)
+    {
+        //divRoleList
+        var div = document.createElement("div");
+        div.setAttribute("style", "height:40px; line-height:40px; padding-left:20px;margin-bottom:10px;");
+        div.setAttribute("roleid", role.Id);
+        div.innerHTML = "<a class=\"a_gray_18\" href=\"javascript:void(0)\" onclick=\"switchRole('" + role.Id + "')\">" + role.Name + "</a>";
+
+        $("#divRoleList").append($(div));
+
+        switchRole(role.Id);
+    }
+
+    function updateRow(role)
+    {
+        $("#divRoleList div[roleid=" + role.Id + "] a").html(role.Name);
+    }
+
+    function switchRole(roleId)
+    {
+        //alert($("#divRoleList div").length);
+
+        $("#divTab").show();
+
+        $("#txtRoleId").val(roleId);
+
+        $("#divRoleList div").each(function (index, element)
+        {
+            if ($(element).attr("roleid") == roleId)
+            {
+                $(element).css("background-color", "#D8E6ED");
+            } else
+            {
+                $(element).css("background-color", "#FFFFFF");
+            }
+        });
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+       //当前权限清除掉
+        $("#divAuthorization [rolekey]").each(function (index, element)
+        {
+            $(element).removeAttr("checked");
+        });
+
+
+        //加载权限
+        $.ajax({
+            url: "/Api/Settings/GetAuthorizationListByRoleId?id=" + roleId,
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR)
+            {
+                layer.close(layerIndex);
+
+                if (data.Success)
+                {
+                    $.each(data.Data, function (n, value)
+                    {
+                        $("#divAuthorization [rolekey=" + value.Key + "]").each(function (index, element)
+                        {
+                            //jquery不灵，原因不明
+                           // $(element).attr("checked", true);
+                            document.getElementById($(element).attr("id")).checked = true;
+                        });
+                    });
+
+                    loadUserList(roleId);
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                layer.close(layerIndex);
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+
+        
+    }
+
+    function switchTab(tabitem, header)
+    {
+        // alert(tabitem);
+        // alert($("#divTab .tabitem").length);
+
+        $("#divTab .tabitem").each(function (index, element)
+        {
+            if ($(element).attr("id") == tabitem)
+            {
+                $(element).show();
+            } else
+            {
+                $(element).hide();
+            }
+        });
+
+        $("#divTabHeader div").each(function (index, element)
+        {
+            $(element).attr("class", "divTab_ContentTab");
+        });
+
+        $(header).parent().attr("class", "divTab_ContentTab_active");
+
+    }
+
+    function loadUserList(roleId) {
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        //把当前人清除掉
+        $('#tableStaff tr:gt(1)').remove();
+
+        //加载人员
+        $.ajax({
+            url: "/Api/Settings/GetUserListByRoleId?id=" + roleId,
+            type: "POST",
+            dataType: "json",
+            success: function (data, status, jqXHR) {
+                layer.close(layerIndex);
+
+                if (data.Success) {
+                    //  alert(JSON.stringify(data));
+
+                    $.each(data.Data, function (n, value) {
+                        var userId = value.Id;
+                        var userName = value.Name;
+
+                        var table = document.getElementById("tableStaff");
+                        var newRow = table.insertRow();
+                        newRow.setAttribute("userid", userId);
+
+                        var tdName = newRow.insertCell();
+                        tdName.height = 30;
+                        tdName.innerHTML = userName;
+
+                        var tdOperation = newRow.insertCell();
+                        var btnRemove = document.createElement("input");
+                        btnRemove.setAttribute("type", "button");
+                        btnRemove.setAttribute("class", "btn_red_small");
+                        btnRemove.setAttribute("value", "删除");
+                        btnRemove.setAttribute("onclick", "removeStaff(this)");
+                        tdOperation.appendChild(btnRemove);
+
+                        var txtUserId = document.createElement("input");
+                        txtUserId.setAttribute("type", "hidden");
+                        txtUserId.setAttribute("value", userId);
+                        tdOperation.appendChild(txtUserId);
+                    });
+
+                } else {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.close(layerIndex);
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+
+    }
+
+    function closeAllLayer()
+    {
+        layer.closeAll();
+    }
+
+    function saveAuthorization()
+    {
+        if ($("#txtRoleId").val() == "")
+        {
+            layerMsg("请选择角色。");
+            return;
+        }
+
+        var roleAuthorizationRelation = new Object();
+
+        roleAuthorizationRelation.Role = $("#txtRoleId").val();
+
+        var itemList = new Array();
+        var n = 0;
+
+        $("#divAuthorization [rolekey]").each(function (index, element)
+        {
+            if ($(element).is(':checked'))
+            {
+                var item = new Object();
+                item.Key = $(element).attr("rolekey");
+
+                itemList[n] = item;
+                n++;
+            }
+        });
+
+        roleAuthorizationRelation.AuthorizationList = itemList;
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        $.ajax({
+            url: "/Api/Settings/UpdateAuthorizationListByRoleId",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(roleAuthorizationRelation),
+            success: function (data, status, jqXHR)
+            {
+                layer.close(layerIndex);
+
+                if (data.Success)
+                {
+                    layerMsg("权限更新成功。");
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                layer.close(layerIndex);
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function addUserToRole_old()
+    {
+        if ($("#txtRoleId").val() == "")
+        {
+            layerMsg("请选择角色。");
+            return;
+        }
+
+        var userId = getSelectedPerson("staffSelector").Id;
+        var userName = getSelectedPerson("staffSelector").Name;
+
+        if (userId == undefined || userId == "")
+        {
+            return;
+        }
+
+        if ($("#tableStaff tr[userid='" + userId + "']").length > 0)
+        {
+            layerMsg("已添加过此人员。");
+            return;
+        }
+
+        var roleUser = new Object();
+        roleUser.Role = $("#txtRoleId").val();
+        roleUser.User = userId;
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        $.ajax({
+            url: "/Api/Settings/AddUserToRole",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(roleUser),
+            success: function (data, status, jqXHR)
+            {
+                layer.close(layerIndex);
+
+                if (data.Success)
+                {
+                    var table = document.getElementById("tableStaff");
+                    var newRow = table.insertRow();
+                    newRow.setAttribute("userid", userId);
+
+                    var tdName = newRow.insertCell();
+                    tdName.height = 30;
+                    tdName.innerHTML = userName;
+
+                    var tdOperation = newRow.insertCell();
+                    var btnRemove = document.createElement("input");
+                    btnRemove.setAttribute("type", "button");
+                    btnRemove.setAttribute("class", "btn_red_small");
+                    btnRemove.setAttribute("value", "删除");
+                    btnRemove.setAttribute("onclick", "removeStaff(this)");
+                    tdOperation.appendChild(btnRemove);
+
+                    var txtUserId = document.createElement("input");
+                    txtUserId.setAttribute("type", "hidden");
+                    txtUserId.setAttribute("value", userId);
+                    tdOperation.appendChild(txtUserId);
+
+                    setSelectedPerson("staffSelector", "", "");
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                layer.close(layerIndex);
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+
+    }
+
+    function chooseUserForRole()
+    {
+        ///_chooseUserForRoleLayerIndex = 
+        layer.open({
+            type: 2,
+            area: ['740px', '530px'], //宽高
+            closeBtn: false,
+            title: "选择",
+            shift: _layerShift,
+            content: '/Unity/MultiplePersonSelector'
+        });
+    }
+
+    function selectMultiplePerson(selectedPersonArray, layerIndex) {
+        layer.close(layerIndex);
+        addUserToRole(selectedPersonArray);
+    }
+
+    function addUserToRole(selectedPersonArray) {
+        if ($("#txtRoleId").val() == "") {
+            layerMsg("请选择角色。");
+            return;
+        }
+
+        var roleId = $("#txtRoleId").val();
+
+        var userRoleArray = new Array();
+        for (i = 0; i < selectedPersonArray.length; i++) {
+            var userRole = new Object();
+            userRole.User = selectedPersonArray[i].id;
+            userRole.Role = $("#txtRoleId").val();
+            userRoleArray[i] = userRole;
+        }
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        $.ajax({
+            url: "/Api/Settings/AddUserToRole",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(userRoleArray),
+            success: function (data, status, jqXHR) {
+                layer.close(layerIndex);
+
+                if (data.Success) {
+                    loadUserList(roleId);
+
+                } else {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest) {
+                layer.close(layerIndex);
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+
+    }
+
+    function removeStaff(obj)
+    {
+        var userId = $(obj).parent("td").parent("tr").attr("userid");
+
+
+        var roleUser = new Object();
+        roleUser.Role = $("#txtRoleId").val();
+        roleUser.User = userId;
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        $.ajax({
+            url: "/Api/Settings/RemoveUserFromRole",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(roleUser),
+            success: function (data, status, jqXHR)
+            {
+                layer.close(layerIndex);
+
+                if (data.Success)
+                {
+                    $(obj).parent("td").parent("tr").remove();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                layer.close(layerIndex);
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+</script>
+
+<input type="hidden" id="txtRoleId" />
+
+<div id="divContainerTitle">角色</div>
+
+<div class="font_gray_15" style="position:absolute; top:70px; left:20px;">
+    注意：不属于任何角色的用户将拥有全部操作权限。
+</div>
+
+<div style="position:absolute; top:100px; left:20px;">
+    <input name="btnAddRole" type="button" class="btn_blue" id="btnAddRole" value="新 增" onclick="create()" /><input name="btnModifyRole" type="button" class="btn_blue" id="btnModifyRole" value="修 改" style="margin-left:1px" onclick="modify()" /><input name="btnRemoveRole" type="button" class="btn_red" id="btnRemoveRole" value="删 除" style="margin-left:30px;" onclick="removeData()" />
+</div>
+
+<div id="divRoleList" style="position:absolute; top:140px; bottom:0px;left:20px;width:200px; OVERFLOW :auto; ">
+    @*<div class="font_gray_18" style="background-color:#D8E6ED; height:40px; line-height:40px; padding-left:20px; margin-bottom:10px;">
+            系统管理员
+        </div>
+        <div style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px;">
+            <a class="a_gray_18" href="">一般角色</a>
+        </div>
+    *@
+
+    @foreach (var role in Model.RoleList)
+    {
+        <div style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px;" roleid="@role.Id">
+            <a class="a_gray_18" href="javascript:void(0)" onclick="switchRole('@role.Id')">@role.Name</a>
+        </div>
+    }
+
+</div>
+
+<div style="position:absolute; top:140px; bottom:10px;left:220px;width:1px; background-color:#D4D4D4">
+</div>
+
+<div id="divTab" style="position: absolute; top: 140px; bottom: 0px; left: 260px; right: 20px;">
+
+    <div>
+        <div id="divTabHeader" style="height: 40px;">
+            <div class="divTab_ContentTab_active">
+                <a id="tabHeaderAuthorization" class="a_gray_16" href="javascript:void(0)" onclick="switchTab('divAuthorizationTabItem',this)">拥有权限</a>
+            </div>
+            <div class="divTab_ContentTab">
+                <a id="tabHeaderUser" class="a_gray_16" href="javascript:void(0)" onclick="switchTab('divUserTabItem',this)">隶属人员</a>
+            </div>
+        </div>
+        <div style="height: 1px; background-color: #D4D4D4;">
+        </div>
+    </div>
+
+    <div class="tabitem" id="divAuthorizationTabItem" style="position: absolute; top: 50px; bottom: 0px; left: 20px; right: 0px;">
+
+        <div style="margin-left: 20px; margin-top: 10px;">
+            <input name="btnSaveAuthorization" type="button" class="btn_blue" id="btnSaveAuthorization" value="保存" onclick="saveAuthorization()" />
+        </div>
+
+        <div id="divAuthorization" class="font_black_16" style="position: absolute; top: 60px; bottom: 0px; left: 20px; right: 0px; overflow-y: auto;">
+
+            <div>
+                <div>
+                    周报
+                </div>
+                <div style="margin-left: 20px; margin-top: 6px;">
+                    @*<div class="authorizationItem">
+                        <input id="chkWeeklyReport_Post" type="checkbox" rolekey="WeeklyReport_Post" >
+                        <label for="chkWeeklyReport_Post">填写</label>
+                    </div>*@
+                    <div class="authorizationItem">
+                        <input id="chkWeeklyReport_SearchByPerson" type="checkbox" rolekey="WeeklyReport_SearchByPerson" />
+                        <label for="chkWeeklyReport_SearchByPerson">查询（按指定人员）</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkWeeklyReport_SearchByOrganization" type="checkbox" rolekey="WeeklyReport_SearchByOrganization" />
+                        <label for="chkWeeklyReport_SearchByOrganization">查询（所在组织机构）</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkWeeklyReport_SearchByAllOrganization" type="checkbox" rolekey="WeeklyReport_SearchByAllOrganization" />
+                        <label for="chkWeeklyReport_SearchByAllOrganization">查询（全部组织机构）</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkWeeklyReport_SearchByWorkType" type="checkbox" rolekey="WeeklyReport_SearchByWorkType" />
+                        <label for="chkWeeklyReport_SearchByWorkType">查询（按项目）</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkWeeklyReport_Check" type="checkbox" rolekey="WeeklyReport_Check" />
+                        <label for="chkWeeklyReport_Check">考核</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkWeeklyReport_ReportBySubmit" type="checkbox" rolekey="WeeklyReport_ReportBySubmit" />
+                        <label for="chkWeeklyReport_ReportBySubmit">统计（提交情况）</label>
+                    </div>
+                    @*<div class="authorizationItem">
+                        <input id="chkWeeklyReport_ReportByOrganization" type="checkbox" rolekey="WeeklyReport_ReportByOrganization" />
+                        <label for="chkWeeklyReport_ReportByOrganization">统计（按组织机构）</label>
+                    </div>*@
+                  
+                </div>
+            </div>
+
+            <div style="margin-top: 10px;">
+                <div>
+                    设置
+                </div>
+                <div style="margin-left: 20px; margin-top: 6px;">
+                    <div class="authorizationItem">
+                        <input id="chkSettings_Organization" type="checkbox" rolekey="Settings_Organization" />
+                        <label for="chkSettings_Organization">组织机构</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkSettings_User" type="checkbox" rolekey="Settings_User" />
+                        <label for="chkSettings_User">人员</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkSettings_Role" type="checkbox" rolekey="Settings_Role" />
+                        <label for="chkSettings_Role">角色</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkSettings_BasalData" type="checkbox" rolekey="Settings_BasalData" />
+                        <label for="chkSettings_BasalData">基础数据</label>
+                    </div>
+                    <div class="authorizationItem">
+                        <input id="chkWeeklyReport_Settings" type="checkbox" rolekey="WeeklyReport_Settings" />
+                        <label for="chkWeeklyReport_Settings">周报相关</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="tabitem" id="divUserTabItem" style="position: absolute; top: 50px; bottom: 0px; left: 20px; right: 0px;">
+
+        <div style="margin-left: 20px; margin-top: 10px;">
+            @*<input name="btnAddUesrToRole" type="button" class="btn_blue" id="btnAddUesrToRole" value="添加" />*@
+
+            @*<div style="float:left">
+                @Helpers.PersonSelector("staffSelector", null, null, ViewBag.Domain.Id, ViewBag.Domain.Name)
+            </div>
+            <div style="float:left;margin-left:10px;height:32px; line-height:32px;">
+                <input name="btnAddUesrToRole" type="button" class="btn_blue" id="btnAddUesrToRole" value="添加" onclick="addUserToRole()" />
+            </div>*@
+            <input name="btnAddUesrToRole" type="button" class="btn_blue" id="btnAddUesrToRole" value="添加" onclick="chooseUserForRole()" />
+        </div>
+
+        <div class="font_black_16" style="position: absolute; top: 60px; bottom: 0px; left: 20px; right: 0px; overflow-y: auto;">
+            <div>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" id="tableStaff">
+                    <tr>
+                        <td width="150"><strong>姓名</strong></td>
+                        <td>&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" height="20">
+                            <div style="background: #D4D4D4; height: 1px;"></div>
+                        </td>
+                    </tr>
+                    @*<tr>
+                        <td height="30">张三</td>
+                        <td>
+                            <input name="btnCreateCancel2" type="button" class="btn_red_small" value="删除" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="30">李四</td>
+                        <td>
+                            <input name="btnCreateCancel3" type="button" class="btn_red_small" value="删除" />
+                        </td>
+                    </tr>*@
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div id="divEdit" style="display:none">
+    <div id="divEditMask" style=" display:none; position:absolute;top:0px;right:0px;bottom:0px;left:0px;background-color:white">
+        <div style="margin-left:30px;margin-top:20px;">请稍候...</div>
+    </div>
+    <table width="100%" style="padding-left:30px;padding-right:20px;" border="0" align="center" cellpadding="0" cellspacing="0" id="tableEdit">
+        <tr>
+            <td>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <!--如果不加 return false，按回车时页面会刷新-->
+                <form id="formCreate" onsubmit="return false;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="100" height="50">名称：</td>
+                            <td>
+                                <input type="hidden" name="txtId" id="txtId">
+                                <input name="txtName" type="text" class="input_18" style="width:300px;" id="txtName" maxlength="50" keyenter /> *
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="130" height="50"><input name="btnRemove" type="button" class="btn_red" id="btnRemove" value="删 除" onclick="removeData()" style="display:none" /></td>
+                        <td align="right">
+                            <input name="btnEditSave" type="button" class="btn_blue" id="btnEditSave" value="保 存" onclick="save()" />
+                            <input name="btnEditCancel" type="button" class="btn_blue" id="btnEditCancel" value="取 消" style="margin-left:1px;" onclick="closeAllLayer()" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>

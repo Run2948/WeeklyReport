@@ -18,7 +18,7 @@ namespace Sheng.Enterprise.Core
 		{
 			get
 			{
-				return ServiceUnity._instance;
+				return _instance;
 			}
 		}
 

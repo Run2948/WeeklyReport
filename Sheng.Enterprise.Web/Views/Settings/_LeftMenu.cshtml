@@ -1,0 +1,42 @@
+﻿<div class="leftMenuItem  @if(ViewBag.LeftMenu == "Personal"){@Html.Raw("leftMenuItem_active")}">
+    @Html.ActionLink("个人", "Password", "Settings", null, new { @class = ViewBag.LeftMenu == "Personal" ? "a_white_16" : "a_black_16" })
+</div>
+
+@if (AuthorizationHelper.Verify("Settings_Organization", HttpContext.Current))
+{ 
+    <div class="leftMenuItem  @if(ViewBag.LeftMenu == "Organization"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("组织机构", "OrganizationalStructure", "Settings", null, new { @class = ViewBag.LeftMenu == "Organization" ? "a_white_16" : "a_black_16" })
+    </div>
+}
+
+@if (AuthorizationHelper.Verify("Settings_User", HttpContext.Current))
+{ 
+    <div class="leftMenuItem  @if(ViewBag.LeftMenu == "User"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("人员", "User", "Settings", null, new { @class = ViewBag.LeftMenu == "User" ? "a_white_16" : "a_black_16" })
+    </div>
+}
+
+@if (AuthorizationHelper.Verify("Settings_Role", HttpContext.Current))
+{ 
+    <div class="leftMenuItem @if(ViewBag.LeftMenu == "Role"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("角色", "Role", "Settings", null, new { @class = ViewBag.LeftMenu == "Role" ? "a_white_16" : "a_black_16" })
+    </div>
+}
+
+@if (AuthorizationHelper.Verify("Settings_BasalData", HttpContext.Current))
+{ 
+    <div class="leftMenuItem @if(ViewBag.LeftMenu == "BasalData"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("基础数据", "JobTitle", "Settings", null, new { @class = ViewBag.LeftMenu == "BasalData" ? "a_white_16" : "a_black_16" })
+    </div>
+}
+
+@if (AuthorizationHelper.Verify("WeeklyReport_Settings", HttpContext.Current))
+{ 
+    <div class="leftMenuItem @if(ViewBag.LeftMenu == "WeeklyReport"){@Html.Raw("leftMenuItem_active")}">
+        @Html.ActionLink("周报相关", "WorkType", "Settings", null, new { @class = ViewBag.LeftMenu == "WeeklyReport" ? "a_white_16" : "a_black_16" })
+    </div>
+}
+
+<div class="leftMenuItem @if(ViewBag.LeftMenu == "Feedback"){@Html.Raw("leftMenuItem_active")}">
+    @Html.ActionLink("反馈", "Feedback", "Settings", null, new { @class = ViewBag.LeftMenu == "Feedback" ? "a_white_16" : "a_black_16" })
+</div>

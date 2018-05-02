@@ -14,24 +14,26 @@ namespace Sheng.Enterprise.Web.Areas.Api.Controllers
 		[AllowedAnonymous]
 		public ActionResult Register()
 		{
-			UserRegisterArgs userRegisterArgs = base.RequestArgs<UserRegisterArgs>();
+			UserRegisterArgs userRegisterArgs = RequestArgs<UserRegisterArgs>();
 			if (userRegisterArgs == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
-			if (base.Session["ValidateCode"] == null || base.Session["ValidateCode"].ToString() != userRegisterArgs.ValidateCode)
+			if (Session["ValidateCode"] == null || Session["ValidateCode"].ToString() != userRegisterArgs.ValidateCode)
 			{
-				return this.RespondResult(false, "验证码无效。");
+				return RespondResult(false, "验证码无效。");
 			}
-			UserRegisterResult userRegisterResult = this._userManager.Register(userRegisterArgs);
+			UserRegisterResult userRegisterResult = _userManager.Register(userRegisterArgs);
 			if (userRegisterResult.Result == UserRegisterResultEnum.Success)
 			{
-				UserContext userContext = new UserContext(userRegisterResult.User, userRegisterResult.Domain);
-				userContext.RootOrganization = UserController._domainManager.GetOrganization(userRegisterResult.Domain.Id);
-				userContext.Authorization = new AuthorizationWrapper();
-				userContext.Organization = UserController._domainManager.GetOrganization(userRegisterResult.User.OrganizationId);
-				SessionContainer.SetUserContext(base.HttpContext, userContext);
-				return this.RespondResult();
+			    UserContext userContext = new UserContext(userRegisterResult.User, userRegisterResult.Domain)
+			    {
+			        RootOrganization = UserController._domainManager.GetOrganization(userRegisterResult.Domain.Id),
+			        Authorization = new AuthorizationWrapper(),
+			        Organization = UserController._domainManager.GetOrganization(userRegisterResult.User.OrganizationId)
+			    };
+			    SessionContainer.SetUserContext(HttpContext, userContext);
+				return RespondResult();
 			}
 			ApiResult apiResult = new ApiResult
 			{
@@ -49,33 +51,33 @@ namespace Sheng.Enterprise.Web.Areas.Api.Controllers
 				apiResult.Message = "帐户被占用，用户信息无效。";
 				break;
 			}
-			return this.RespondResult(apiResult);
+			return RespondResult(apiResult);
 		}
 
 		public ActionResult GetUserList()
 		{
-			GetUserListArgs getUserListArgs = base.RequestArgs<GetUserListArgs>();
+			GetUserListArgs getUserListArgs = RequestArgs<GetUserListArgs>();
 			if (getUserListArgs == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
-			getUserListArgs.DomainId = base.UserContext.Domain.Id;
-			GetItemListResult userList = this._userManager.GetUserList(getUserListArgs);
-			return this.RespondDataResult(userList);
+			getUserListArgs.DomainId = UserContext.Domain.Id;
+			GetItemListResult userList = _userManager.GetUserList(getUserListArgs);
+			return RespondDataResult(userList);
 		}
 
 		public ActionResult Update()
 		{
-			UserDto userDto = base.RequestArgs<UserDto>();
+			UserDto userDto = RequestArgs<UserDto>();
 			if (userDto == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
 			User user = userDto.User;
-			UserOperatorResult userOperatorResult = this._userManager.Update(user, userDto.WorkTypeList);
+			UserOperatorResult userOperatorResult = _userManager.Update(user, userDto.WorkTypeList);
 			if (userOperatorResult == UserOperatorResult.Success)
 			{
-				return this.RespondResult();
+				return RespondResult();
 			}
 			ApiResult apiResult = new ApiResult
 			{
@@ -85,22 +87,22 @@ namespace Sheng.Enterprise.Web.Areas.Api.Controllers
 			{
 				apiResult.Message = "指定的帐号已被占用。";
 			}
-			return this.RespondResult(apiResult);
+			return RespondResult(apiResult);
 		}
 
 		public ActionResult Create()
 		{
-			UserDto userDto = base.RequestArgs<UserDto>();
+			UserDto userDto = RequestArgs<UserDto>();
 			if (userDto == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
 			User user = userDto.User;
 			user.Id = Guid.NewGuid();
-			UserOperatorResult userOperatorResult = this._userManager.Create(user, userDto.WorkTypeList);
+			UserOperatorResult userOperatorResult = _userManager.Create(user, userDto.WorkTypeList);
 			if (userOperatorResult == UserOperatorResult.Success)
 			{
-				return this.RespondResult();
+				return RespondResult();
 			}
 			ApiResult apiResult = new ApiResult
 			{
@@ -110,56 +112,56 @@ namespace Sheng.Enterprise.Web.Areas.Api.Controllers
 			{
 				apiResult.Message = "指定的帐号已被占用。";
 			}
-			return this.RespondResult(apiResult);
+			return RespondResult(apiResult);
 		}
 
 		public ActionResult Remove()
 		{
-			Guid guid = Guid.Parse(base.Request.QueryString["id"]);
-			if (guid == base.UserContext.User.Id)
+			Guid guid = Guid.Parse(Request.QueryString["id"]);
+			if (guid == UserContext.User.Id)
 			{
-				return this.RespondResult(false, "您不能删除自己。");
+				return RespondResult(false, "您不能删除自己。");
 			}
-			this._userManager.Remove(guid);
-			return this.RespondResult();
+			_userManager.Remove(guid);
+			return RespondResult();
 		}
 
 		public ActionResult ResetPasswordToDefault()
 		{
-			string input = base.Request.QueryString["id"];
-			this._userManager.ResetPasswordToDefault(Guid.Parse(input));
-			return this.RespondResult();
+			string input = Request.QueryString["id"];
+			_userManager.ResetPasswordToDefault(Guid.Parse(input));
+			return RespondResult();
 		}
 
 		[AllowedAnonymous]
 		public ActionResult ResetPassword()
 		{
-			ResetPasswordArgs resetPasswordArgs = base.RequestArgs<ResetPasswordArgs>();
+			ResetPasswordArgs resetPasswordArgs = RequestArgs<ResetPasswordArgs>();
 			if (resetPasswordArgs == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
-			if (this._userManager.ResetPassword(resetPasswordArgs))
+			if (_userManager.ResetPassword(resetPasswordArgs))
 			{
-				return this.RespondResult();
+				return RespondResult();
 			}
 			ApiResult apiResult = new ApiResult
 			{
 				Success = false
 			};
 			apiResult.Message = "请检查您输入的帐户及电子邮件地址是否正确。";
-			return this.RespondResult(apiResult);
+			return RespondResult(apiResult);
 		}
 
 		public ActionResult UpdatePassword()
 		{
-			UpdatePasswordArgs updatePasswordArgs = base.RequestArgs<UpdatePasswordArgs>();
+			UpdatePasswordArgs updatePasswordArgs = RequestArgs<UpdatePasswordArgs>();
 			if (updatePasswordArgs == null)
 			{
-				return this.RespondResult(false, "参数无效。");
+				return RespondResult(false, "参数无效。");
 			}
-			bool success = this._userManager.UpdatePassword(base.UserContext.User.Id, updatePasswordArgs);
-			return this.RespondResult(success, string.Empty);
+			bool success = _userManager.UpdatePassword(UserContext.User.Id, updatePasswordArgs);
+			return RespondResult(success, string.Empty);
 		}
 	}
 }

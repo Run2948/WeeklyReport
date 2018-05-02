@@ -1,0 +1,473 @@
+﻿@model Sheng.Enterprise.Web.Models.CheckRelationViewModel
+
+@{
+    ViewBag.Title = "考核关系";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "设 置";
+    ViewBag.MainMenu = "Settings";
+    ViewBag.LeftMenu = "WeeklyReport";
+    ViewBag.BasalData = "CheckRelation";
+
+}
+
+<script type="text/javascript">
+
+    var _createCheckerDivHtml;
+
+    var _mode = "create";//modify
+
+    $(document).ready(function ()
+    {
+        _createCheckerDivHtml = $("#divCheckerEdit").html();
+        $("#divCheckerEdit").html("");
+    });
+
+    function closeAllLayer()
+    {
+        layer.closeAll();
+    }
+
+    function bindCheckerSelectorChangedEvent()
+    {
+        //选择考核人之后，把当前被考核人列出来
+        $("#checkerSelector").change(function ()
+        {
+            //把当前被考核人清除掉
+            $('#tableStaff tr:gt(1)').remove();
+
+            var checkerId = getSelectedPerson("checkerSelector").Id;
+            if (checkerId == undefined || checkerId == "")
+                return;
+
+            var layerIndex = layer.load(0, {
+                shade: [0.2, '#fff']
+            });
+
+            $.ajax({
+                url: "/Api/Settings/GetCheckStaffList?checker=" + checkerId,
+                type: "POST",
+                dataType: "json",
+                success: function (data, status, jqXHR)
+                {
+                    layer.close(layerIndex);
+
+                    if (data.Success)
+                    {
+                        $.each(data.Data, function (n, value)
+                        {
+                            var table = document.getElementById("tableStaff");
+                            var newRow = table.insertRow();
+                            newRow.setAttribute("userid", value.Id);
+
+                            var tdName = newRow.insertCell();
+                            tdName.height = 30;
+                            tdName.innerHTML = value.Name;
+
+                            var tdOperation = newRow.insertCell();
+                            var btnRemove = document.createElement("input");
+                            btnRemove.setAttribute("type", "button");
+                            btnRemove.setAttribute("class", "btn_red_small");
+                            btnRemove.setAttribute("value", "删除");
+                            btnRemove.setAttribute("onclick", "removeStaff(this)");
+                            tdOperation.appendChild(btnRemove);
+
+                            var txtUserId = document.createElement("input");
+                            txtUserId.setAttribute("type", "hidden");
+                            txtUserId.setAttribute("value", value.Id);
+                            tdOperation.appendChild(txtUserId);
+                        });
+
+                    } else
+                    {
+                        layerAlert(data.Message);
+                    }
+                },
+                error: function (xmlHttpRequest)
+                {
+                    layer.closeAll();
+
+                    alert("Error: " + xmlHttpRequest.status);
+                }
+            });
+        });
+    }
+
+    //考核人
+
+    function createCheckRelation()
+    {
+        _mode = "create";
+
+        var title;
+        title = "新增";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['530px', '550px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift:_layerShift,
+            content: _createCheckerDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        setPersonSelectorEnabled("checkerSelector");
+
+        bindCheckerSelectorChangedEvent();
+
+        $("#btnRemoveChecker").hide();
+    }
+
+    function modifyCheckRelation(checkerId, checkerName)
+    {
+        _mode = "modify";
+
+        var title;
+        title = "修改";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['530px', '550px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift:_layerShift,
+            content: _createCheckerDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        setPersonSelectorDisabled("checkerSelector");
+
+        bindCheckerSelectorChangedEvent();
+
+        setSelectedPerson("checkerSelector", checkerId, checkerName);
+
+        $("#btnRemoveChecker").show();
+
+    }
+
+    function saveCheckRelation()
+    {
+        var checkerId = getSelectedPerson("checkerSelector").Id;
+        var staffCount = $("#tableStaff tr:gt(1)").length;
+
+        if (checkerId == undefined || checkerId == "" || staffCount == 0)
+        {
+            layerAlert("请选择考核人并添加被考核人");
+            return;
+        }
+
+        //此处不论是修改还是新增，走的流程都是新增
+        createCheckRelationSave();
+    }
+
+    function removeCheckRelation()
+    {
+        var checkerId = getSelectedPerson("checkerSelector").Id;
+        if (checkerId == undefined || checkerId == "")
+        {
+            return;
+        }
+
+        var msg = "是否确认删除此考核人与被考核人的考核关系？"
+
+        var index = layer.confirm(msg, {
+            btn: ['确认', '取消'], //按钮
+            shade: [0.4, '#393D49'],
+            title: false,
+            closeBtn: false,
+            shift:_layerShift
+        }, function ()
+        {
+            $("#divCheckerEditMask").show();
+            layer.close(index);
+
+            $.ajax({
+                url: "/Api/Settings/RemoveCheckRelation?checker=" + checkerId,
+                type: "POST",
+                dataType: "json",
+                success: function (data, status, jqXHR)
+                {
+                    if (data.Success)
+                    {
+                        window.location.reload();
+
+                    } else
+                    {
+                        layerAlert(data.Message);
+                    }
+                },
+                error: function (xmlHttpRequest)
+                {
+                    layer.closeAll();
+
+                    alert("Error: " + xmlHttpRequest.status);
+                }
+            });
+        });
+    }
+
+    function createCheckRelationSave()
+    {
+        $("#divCheckerEditMask").show();
+
+        var checkRelation = new Object();
+
+        checkRelation.Checker = getSelectedPerson("checkerSelector").Id;
+        checkRelation.StaffList = new Array();
+
+        $("#tableStaff tr:gt(1)").each(function (n, value)
+        {
+            checkRelation.StaffList[n] = $(this).find("input[type='hidden']").val();
+        });
+
+        $.ajax({
+            url: "/Api/Settings/CreateCheckRelation",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(checkRelation),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    window.location.reload();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function chooseUserForStaff() {
+        ///_chooseUserForRoleLayerIndex = 
+        layer.open({
+            type: 2,
+            area: ['740px', '530px'], //宽高
+            closeBtn: false,
+            title: "选择",
+            shift: _layerShift,
+            content: '/Unity/MultiplePersonSelector'
+        });
+    }
+
+    function selectMultiplePerson(selectedPersonArray, layerIndex) {
+        layer.close(layerIndex);
+        addStaff(selectedPersonArray);
+    }
+
+    function addStaff(selectedPersonArray) {
+        if ($("#txtRoleId").val() == "") {
+            layerMsg("请选择角色。");
+            return;
+        }
+
+        var roleId = $("#txtRoleId").val();
+
+        
+        for (i = 0; i < selectedPersonArray.length; i++) {
+            
+            var userId = selectedPersonArray[i].id;
+            var userName = selectedPersonArray[i].name;
+
+            if ($("#tableStaff tr[userid='" + userId + "']").length > 0) {
+                continue;
+            }
+
+            var table = document.getElementById("tableStaff");
+            var newRow = table.insertRow();
+            newRow.setAttribute("userid", userId);
+
+            var tdName = newRow.insertCell();
+            tdName.height = 30;
+            tdName.innerHTML = userName;
+
+            var tdOperation = newRow.insertCell();
+            var btnRemove = document.createElement("input");
+            btnRemove.setAttribute("type", "button");
+            btnRemove.setAttribute("class", "btn_red_small");
+            btnRemove.setAttribute("value", "删除");
+            btnRemove.setAttribute("onclick", "removeStaff(this)");
+            tdOperation.appendChild(btnRemove);
+
+            var txtUserId = document.createElement("input");
+            txtUserId.setAttribute("type", "hidden");
+            txtUserId.setAttribute("value", userId);
+            tdOperation.appendChild(txtUserId);
+
+        }
+    }
+
+
+    function removeStaff(obj)
+    {
+        $(obj).parent("td").parent("tr").remove();
+    }
+
+</script>
+<div id="divContent">
+    <div id="divContainerTitle">周报</div>
+
+    <div style=" position:absolute; top:70px; bottom:0px;left:20px;width:200px; OVERFLOW :auto; ">
+        @Html.Partial("_WeeklyReportMenu")
+    </div>
+
+    <div style=" position:absolute; top:70px; bottom:10px;left:220px;width:1px; background-color:#D4D4D4">
+    </div>
+</div>
+
+
+<div style=" position:absolute; top:70px; bottom:0px;left:260px;right:20px;OVERFLOW-Y: auto;">
+    <div style="margin-left:20px;">
+        <input name="btnCreateChildOrganization" type="button" class="btn_blue" id="btnCreateChildOrganization" value="新增考核关系" onclick="createCheckRelation()" />
+        <span class="font_lightGray_15" style="margin-left:30px;"></span>
+    </div>
+
+    <div style="position:absolute; top:50px; bottom:0px;left:0px; right:0px ;OVERFLOW-Y: hidden; ">
+        <div style="margin-top:5px; background-color:#ccc; height:1px"></div>
+
+        <div style="position:absolute;bottom:0px; top:20px; left:20px; right:20px; overflow:auto">
+
+            @foreach (var checker in Model.CheckerWrapperList)
+            {
+                <div style="margin-bottom:20px;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td height="40"><b>@checker.Name</b></td>
+                        </tr>
+                    </table>
+
+                    <table border="0" cellspacing="0" cellpadding="0" style="margin-left:30px;">
+                        <tr>
+                            <td height="40">
+                                @{
+                int i = 1;
+                foreach (var staff in checker.StaffList)
+                {
+                    @Html.Raw(staff.Name);
+                                 if (i != checker.StaffList.Count)
+                                 {
+                                    @Html.Raw("，");
+                                 }
+                                 i++;
+                }
+                                }
+
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td height="40">
+                                <input type="button" class="btn_blue" value="修改" onclick="modifyCheckRelation('@checker.Id','@checker.Name')" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            }
+        </div>
+
+
+
+    </div>
+
+</div>
+
+<!--考核人编辑-->
+<div id="divCheckerEdit" style="display:none">
+    <div id="divCheckerEditMask" style=" display:none; position:absolute;top:0px;right:0px;bottom:0px;left:0px;background-color:white">
+        <div style="margin-left:30px;margin-top:20px;">请稍候...</div>
+    </div>
+    <table width="500" border="0" align="center" cellpadding="0" cellspacing="0" id="tableEdit">
+        <tr>
+            <td>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="100" height="50">考核人：</td>
+                        <td>
+                            @Helpers.PersonSelector("checkerSelector", null, null, ViewBag.RootOrganization.Id, ViewBag.RootOrganization.Name)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td height="50">被考核人：</td>
+                        <td>
+                            @*<div>
+                                <div style="float:left">
+                                    @Helpers.PersonSelector("staffSelector", null, null, ViewBag.Domain.Id, ViewBag.Domain.Name)
+                                </div>
+                                <div style="float:left;margin-left:10px;height:32px; line-height:32px;">
+                                    <input name="btnAddStaff" id="btnAddStaff" type="button" class="btn_blue" value="添加" onclick="addStaff()" />
+                                </div>
+                            </div>*@
+                            <input name="btnAddStaff" id="btnAddStaff" type="button" class="btn_blue" value="添加" onclick="chooseUserForStaff()" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>&nbsp;</td>
+                        <td>
+                            <div style="height:300px; margin-top:20px; overflow:auto">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" id="tableStaff">
+                                    <tr>
+                                        <td><strong>姓名</strong></td>
+                                        <td width="60">&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="3" height="20"><div style="background:#D4D4D4; height:1px;"></div></td>
+                                    </tr>
+                                    @*<tr>
+                                            <td><a href="#">张三</a></td>
+                                            <td><input name="btnCreateCancel2" type="button" class="btn_red_small" value="删除" onclick="removeStaff(this);" /></td>
+                                        </tr>*@
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="85" height="50" align="right"><input name="btnRemoveChecker" type="button" class="btn_red" id="btnRemoveChecker" value="删 除" onclick="removeCheckRelation()" style="display:none" /></td>
+                        <td align="right">
+                            <input name="btnCreateSave" type="button" class="btn_blue" id="btnCreateSave" value="保 存" onclick="saveCheckRelation()" />
+                            <input name="btnCreateCancel" type="button" class="btn_blue" id="btnCreateCancel" value="取 消" style="margin-left:1px;" onclick="closeAllLayer()" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+</div>

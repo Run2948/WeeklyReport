@@ -1,0 +1,136 @@
+﻿@model Sheng.Enterprise.Web.Models.OrganizationViewModel
+
+@{
+    ViewBag.Title = "组织信息";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "设 置";
+    ViewBag.MainMenu = "Settings";
+    ViewBag.LeftMenu = "Organization";
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function ()
+    {
+        $("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                save();
+            }
+        });
+    });
+
+    function save()
+    {
+        $("#btnSave").attr("disabled", "disabled");
+
+        if ($("#form").validate({
+            rules: {
+                     "Domain.Name": "required"
+        },
+            messages: {
+                     "Domain.Name": "!"
+        }
+        }).form() == false)
+        {
+            $("#btnSave").removeAttr("disabled");
+            return;
+        }
+
+        //提交表单
+        showMask();
+        var layerIndex = layer.load(0, {
+            shade: false
+        });
+
+        var domain = new Object();
+
+        domain.Name = $("#txtName").val();
+        domain.ContactPerson = $("#txtContactPerson").val();
+        domain.Email = $("#txtEmail").val();
+        domain.Telphone = $("#txtTelphone").val();
+
+        $.ajax({
+            url: "/Api/Domain/UpdateDomain",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(domain),
+            success: function (data, status, jqXHR)
+            {
+                layer.closeAll();
+                hideMask();
+
+                $("#btnSave").removeAttr("disabled");
+
+                layer.msg("机构基本信息更新成功。", {
+                    time: 1000
+                });
+
+            },
+            error: function (xmlHttpRequest)
+            {
+                layer.closeAll();
+                hideMask();
+
+                $("#btnSave").removeAttr("disabled");
+
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+</script>
+
+<div id="divContent">
+    <div id="divContainerTitle">
+        机构
+    </div>
+    <div style=" margin-top:20px;">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td class="td_ContentTab_active">基本信息</td>
+                <td class="td_ContentTab">
+                    @Html.ActionLink("组织架构", "OrganizationalStructure", "Settings", null, new { @class = "a_black_16" })
+                </td>
+                <td>&nbsp;</td>
+            </tr>
+            <tr>
+                <td colspan="3" bgcolor="#D4D4D4" height="1"></td>
+            </tr>
+        </table>
+
+    </div>
+    <div style="margin-left:40px;margin-bottom:30px;margin-top:30px;">
+        <form id="form" method="post" action="Organization">
+            @*<table width="540" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="140" height="50">机构名称：</td>
+                    <td><input name="Domain.Name" value="@Model.Domain.Name" type="text" maxlength="50" class="input_18" style="width:350px;" id="txtName" keyenter /> *</td>
+                </tr>
+                <tr>
+                    <td height="50">联系人：</td>
+                    <td><input name="Domain.ContactPerson" value="@Model.Domain.ContactPerson" maxlength="25" type="text" class="input_18" style="width:350px;" id="txtContactPerson" keyenter /></td>
+                </tr>
+                <tr>
+                    <td height="50">联系电话：</td>
+                    <td><input name="Domain.Telphone" value="@Model.Domain.Telphone" type="text" maxlength="50" class="input_18" style="width:350px;" id="txtTelphone" keyenter /></td>
+                </tr>
+                <tr>
+                    <td height="50">电子邮件：</td>
+                    <td><input name="Domain.Email" value="@Model.Domain.Email" type="text" maxlength="100" class="input_18" style="width:350px;" id="txtEmail" keyenter /></td>
+                </tr>
+            </table>*@
+        </form>
+    </div>
+    <div style="margin-left:40px;">
+
+        <table width="500" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td height="50"><input name="btnLogin" type="button" class="btn_blue" id="btnSave" value="保 存" onclick="save()" /></td>
+            </tr>
+
+        </table>
+    </div>
+
+</div>

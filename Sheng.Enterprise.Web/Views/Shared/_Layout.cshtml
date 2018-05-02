@@ -1,0 +1,94 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/common")
+    @*@Scripts.Render("~/bundles/layer")*@
+
+    @Scripts.Render("~/Scripts/layer/layer.js")
+    @Scripts.Render("~/Scripts/laytpl.js")
+    @Scripts.Render("~/Scripts/laypage/laypage.js")
+    @Scripts.Render("~/Scripts/json2.js")
+
+    <script type="text/javascript">
+        //layer.config({
+        //    extend: ['skin/espresso/style.css'], //加载新皮肤
+        //    skin: 'layer-ext-espresso' //一旦设定，所有弹层风格都采用此主题。
+        //});
+
+        function showMask()
+        {
+            //$(document).find("#divContent *").each(function ()
+            //{
+            //    $(this).attr("disabled", "disabled");
+            //});
+
+            $("#divContentMask").show();
+        }
+
+        function hideMask()
+        {
+            $("#divContentMask").hide();
+        }
+
+    </script>
+</head>
+<body>
+    <div id="divTopBar">
+        <div id="divLogo">
+            <span class="font_drakblue_18">@ViewBag.RootOrganization.Name</span>
+        </div>
+        <div id="divMainMenu">
+            <table id="tableTopBar" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="td_MainMenu @if(ViewBag.MainMenu == "WeeklyReport"){@Html.Raw("td_MainMenu_active")}">
+                        @Html.ActionLink("周报", "Post", "WeeklyReport", null, new { @class = "a_darkblue_18" })
+                    </td>
+                    <td class="td_MainMenu @if(ViewBag.MainMenu == "Settings"){@Html.Raw("td_MainMenu_active")}">
+                        @Html.ActionLink("设置", "Password", "Settings", null, new { @class = "a_darkblue_18" })
+                    </td>
+                    <td class="td_MainMenu @if(ViewBag.MainMenu == "Introduction"){@Html.Raw("td_MainMenu_active")}">
+                        @Html.ActionLink("快速入门", "Introduction", "Home", null, new { @class = "a_darkblue_18" })
+                    </td>
+                    <td class="td_MainMenu">&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+        <div id="divTopRight">
+            <table id="tableTopBar" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td class="td_MainMenu font_darkBlue_18">@ViewBag.User.Name</td>
+                    <td class="td_MainMenu">@Html.ActionLink("退出", "Logout", "Home", null, new { @class = "a_darkblue_18" })</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div id="divContainer">
+        <div id="divLeftMenu">
+            <div id="divLeftTitle">
+                <span style="margin-left:30px">
+                    @ViewBag.LeftTitle
+                </span>
+            </div>
+            <div>
+                @Html.Partial("_LeftMenu")
+            </div>
+        </div>
+        <div id="divContentWrapper">
+            <div id="divContent">
+                @RenderBody()
+            </div>
+        </div>
+        <div id="divContentMask" style="display:none">
+        </div>
+    </div>
+   
+
+</body>
+</html>

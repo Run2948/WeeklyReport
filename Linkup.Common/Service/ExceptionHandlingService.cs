@@ -47,10 +47,10 @@ namespace Linkup.Common
             return _exceptionManager.HandleException(exceptionToHandle, ExceptionPolicyNames.JustLog);
         }
 
-        //public bool HandleException(Exception exceptionToHandle, string policyName)
-        //{
-        //    return _exceptionManager.HandleException(exceptionToHandle, policyName);
-        //}
+        public bool HandleException(Exception exceptionToHandle, string policyName)
+        {
+            return _exceptionManager.HandleException(exceptionToHandle, policyName);
+        }
 
         /// <summary>
         /// LogAndWrap

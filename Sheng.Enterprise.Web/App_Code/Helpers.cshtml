@@ -1,0 +1,17 @@
+﻿@helper HelperName(string name) {
+    // 你的帮助程序可以包含代码和/或标记，例如
+    // var msg = "你好 " + name;
+    // <p>@msg</p>
+    // 有关详细信息，请访问 http://go.microsoft.com/fwlink/?LinkID=204658
+}
+
+
+@helper OrganizationSelector(string domId, string id, string name, Guid domainId, string domainName, bool chooseButton = true)
+{
+    @name
+}
+
+@helper TitleWithDate(string title,dynamic viewBag)
+{
+    @title
+}

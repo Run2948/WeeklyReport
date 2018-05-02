@@ -1,0 +1,47 @@
+﻿<div @if (ViewBag.BasalData == "WorkType") { @Html.Raw("class='font_gray_18'")    }
+     style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px; @if (ViewBag.BasalData == "WorkType") { @Html.Raw("background-color:#D8E6ED;")  } ">
+    @if (ViewBag.BasalData == "WorkType")
+    {
+        @Html.Raw("项目/子项目");
+    }
+    else
+    {
+        @Html.ActionLink("项目/子项目", "WorkType", null, new { @class = "a_gray_18" });
+    }
+</div>
+
+<div @if (ViewBag.BasalData == "WorkStatus") { @Html.Raw("class='font_gray_18'")   }
+     style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px; @if (ViewBag.BasalData == "WorkStatus") { @Html.Raw("background-color:#D8E6ED;")  } ">
+    @if (ViewBag.BasalData == "WorkStatus")
+    {
+        @Html.Raw("完成情况");
+    }
+    else
+    {
+        @Html.ActionLink("完成情况", "WorkStatus", null, new { @class = "a_gray_18" });
+    }
+</div>
+
+@*<div @if (ViewBag.BasalData == "CheckPoint") { @Html.Raw("class='font_gray_18'")    }
+     style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px; @if (ViewBag.BasalData == "CheckPoint") { @Html.Raw("background-color:#D8E6ED;")  } ">
+    @if (ViewBag.BasalData == "CheckPoint")
+    {
+        @Html.Raw("考核项目");
+    }
+    else
+    {
+        @Html.ActionLink("考核项目", "CheckPoint", null, new { @class = "a_gray_18" });
+    }
+</div>*@
+
+<div @if (ViewBag.BasalData == "CheckRelation") { @Html.Raw("class='font_gray_18'")     }
+     style="height:40px; line-height:40px; padding-left:20px;margin-bottom:10px; @if (ViewBag.BasalData == "CheckRelation") { @Html.Raw("background-color:#D8E6ED;")  } ">
+    @if (ViewBag.BasalData == "CheckRelation")
+    {
+        @Html.Raw("考核关系");
+    }
+    else
+    {
+        @Html.ActionLink("考核关系", "CheckRelation", null, new { @class = "a_gray_18" });
+    }
+</div>

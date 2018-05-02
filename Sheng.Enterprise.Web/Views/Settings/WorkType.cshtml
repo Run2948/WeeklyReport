@@ -1,0 +1,706 @@
+﻿@model Sheng.Enterprise.Web.Models.WorkTypeViewModel
+
+@{
+    ViewBag.Title = "项目/子项目";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "设 置";
+    ViewBag.MainMenu = "Settings";
+    ViewBag.LeftMenu = "WeeklyReport";
+    ViewBag.BasalData = "WorkType";
+}
+
+<script type="text/javascript">
+
+    var _createWorkTypeDivHtml;
+    var _createWorkTaskDivHtml;
+
+    var _mode = "create";//modify
+
+    $(document).ready(function ()
+    {
+        _createWorkTypeDivHtml = $("#divWorkTypeEdit").html();
+        $("#divWorkTypeEdit").html("");
+
+        _createWorkTaskDivHtml = $("#divWorkTaskEdit").html();
+        $("#divWorkTaskEdit").html("");
+    });
+
+    function closeAllLayer()
+    {
+        layer.closeAll();
+    }
+
+    //项目名称
+
+    function createWorkType()
+    {
+        _mode = "create";
+
+        var title;
+        title = "新增";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['500px', '190px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift:_layerShift,
+            content: _createWorkTypeDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        $("#tableEdit").find("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                saveWorkType();
+            }
+        });
+
+        $("#btnRemoveWorkType").hide();
+
+        $("#txtWorkTypeName").focus();
+    }
+
+    function modifyWorkType(id, name)
+    {
+        _mode = "modify";
+
+        var title;
+        title = "修改";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['500px', '190px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift:_layerShift,
+            content: _createWorkTypeDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        $("#tableEdit").find("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                saveWorkType();
+            }
+        });
+
+
+        $("#txtWorkTypeName").focus();
+
+        $("#txtWorkTypeId").val(id);
+        $("#txtWorkTypeName").val(name);
+
+        $("#btnRemoveWorkType").show();
+
+    }
+
+    function saveWorkType()
+    {
+        if ($("#formWorkTypeEdit").validate({
+            rules: {
+                "txtWorkTypeName": "required"
+        },
+            messages: {
+                "txtWorkTypeName": "!"
+        }
+        }).form() == false)
+            return;
+
+        if (_mode == "create")
+        {
+            createWorkTypeSave();
+        }
+        else
+        {
+            modifyWorkTypeSave();
+        }
+    }
+
+    function removeWorkType()
+    {
+        var id = $("#txtWorkTypeId").val();
+        if (id == undefined || id == "")
+        {
+            return;
+        }
+
+        var msg = "是否确认删除？"
+
+        var index = layer.confirm(msg, {
+            btn: ['确认', '取消'], //按钮
+            shade: [0.4, '#393D49'],
+            title: false,
+            closeBtn: false,
+            shift:_layerShift
+        }, function ()
+        {
+            $("#divWorkTypeEditMask").show();
+            layer.close(index);
+
+            $.ajax({
+                url: "/Api/Settings/RemoveWorkType?id=" + id,
+                type: "POST",
+                dataType: "json",
+                success: function (data, status, jqXHR)
+                {
+                    layer.closeAll();
+
+                    if (data.Success)
+                    {
+                        removeWorkTypeDiv(id);
+
+                    } else
+                    {
+                        layerAlert(data.Message);
+                    }
+                },
+                error: function (xmlHttpRequest)
+                {
+                    layer.closeAll();
+
+                    alert("Error: " + xmlHttpRequest.status);
+                }
+            });
+        });
+    }
+
+    function createWorkTypeSave()
+    {
+        $("#divWorkTypeEditMask").show();
+
+        var workType = new Object();
+
+        workType.Domain = '@ViewBag.Domain.Id';
+        workType.Name = $("#txtWorkTypeName").val();
+
+        $.ajax({
+            url: "/Api/Settings/CreateWorkType",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(workType),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    workType.Id = data.Data.Id;
+
+                    addWorkTypeDiv(workType);
+
+                    closeAllLayer();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function modifyWorkTypeSave()
+    {
+        $("#divWorkTypeEditMask").show();
+
+        var workType = new Object();
+
+        workType.Id = $("#txtWorkTypeId").val();
+        workType.Domain = '@ViewBag.Domain.Id';
+        workType.Name = $("#txtWorkTypeName").val();
+
+        $.ajax({
+            url: "/Api/Settings/UpdateWorkType",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(workType),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    updateWorkTypeDiv(workType);
+
+                    closeAllLayer();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function addWorkTypeDiv(workType)
+    {
+        var workTypeHtml = "<div id=\"divWorkType_" + workType.Id + "\" style=\"margin-bottom:20px;\">\
+                    <table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\">\
+                        <tr>\
+                            <td height=\"40\" id=\"tdWorkType_" + workType.Id + "\"><a href=\"javascript:void(0)\" class=\"a_blue_17\" onclick=\"modifyWorkType('" + workType.Id + "','" + workType.Name + "')\">" + workType.Name + "</a></td>\
+                        </tr>\
+                    </table>\
+                    <table id=\"tableWorkTask_" + workType.Id + "\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" style=\"margin-left:30px;\">\
+                        <tr>\
+                            <td height=\"40\">\
+                                <input  type=\"button\" class=\"btn_blue\"  value=\"新增任务\" onclick=\"createWorkTask('" + workType.Id + "')\" />\
+                            </td>\
+                        </tr>\
+                    </table>\
+                </div>";
+
+        $("#divWorkTypeContainer").append(workTypeHtml);
+    }
+
+    function updateWorkTypeDiv(workType)
+    {
+        //var innerHTML = "<td height='40'><a href='javascript:void(0)'  class='a_blue_15' onclick=\"modifyWorkType('" + workType.Id + "','" + workType.Name + "')\">" + workType.Name + "</a></td>";
+        //$("#tr_" + workType.Id).html(innerHTML);
+
+        var innerHTML = "<a href='javascript:void(0)'  class='a_blue_17' onclick=\"modifyWorkType('" + workType.Id + "','" + workType.Name + "')\">" + workType.Name + "</a>";
+        $("#tdWorkType_" + workType.Id).html(innerHTML);
+    }
+
+    function removeWorkTypeDiv(id)
+    {
+        $("#divWorkType_" + id).slideUp(300, function ()
+        {
+            $("#divWorkType_" + id).remove();
+        });
+    }
+
+
+    //子项目
+
+    function createWorkTask(workTypeId)
+    {
+        _mode = "create";
+
+        var title;
+        title = "新增";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['500px', '190px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift: _layerShift,
+            content: _createWorkTaskDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        $("#tableEdit").find("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                saveWorkTask();
+            }
+        });
+
+        $("#btnRemoveWorkTask").hide();
+
+        $("#txtWorkTypeId").val(workTypeId);
+        $("#txtWorkTaskName").focus();
+
+    }
+
+    function modifyWorkTask(id, name,workTypeId)
+    {
+        _mode = "modify";
+
+        var title;
+        title = "修改";
+
+        var layerIndex = layer.open({
+            type: 1,
+            area: ['500px', '190px'], //宽高
+            closeBtn: false,
+            title: title,
+            shift: _layerShift,
+            content: _createWorkTaskDivHtml,
+            success: function (layero, index)
+            {
+                $(layero).focus();
+                $(layero).keypress(function (e)
+                {
+                    if (e.keyCode == 27)
+                    {
+                        layer.close(layerIndex);
+                    }
+                });
+            }
+        });
+
+        $("#tableEdit").find("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                saveWorkTask();
+            }
+        });
+
+        $("#txtWorkTaskName").focus();
+
+        $("#txtWorkTaskId").val(id);
+        $("#txtWorkTypeId").val(workTypeId);
+        $("#txtWorkTaskName").val(name);
+
+        $("#btnRemoveWorkTask").show();
+
+    }
+
+    function saveWorkTask()
+    {
+        if ($("#formWorkTaskEdit").validate({
+            rules: {
+                "txtWorkTaskName": "required"
+        },
+            messages: {
+                "txtWorkTaskName": "!"
+        }
+        }).form() == false)
+            return;
+
+        if (_mode == "create")
+        {
+            createWorkTaskSave();
+        }
+        else
+        {
+            modifyWorkTaskSave();
+        }
+    }
+
+    function removeWorkTask()
+    {
+        var id = $("#txtWorkTaskId").val();
+        if (id == undefined || id == "")
+        {
+            return;
+        }
+
+        var msg = "是否确认删除？"
+
+        var index = layer.confirm(msg, {
+            btn: ['确认', '取消'], //按钮
+            shade: [0.4, '#393D49'],
+            title: false,
+            closeBtn: false,
+            shift: _layerShift
+        }, function ()
+        {
+            $("#divWorkTaskEditMask").show();
+            layer.close(index);
+
+            $.ajax({
+                url: "/Api/Settings/RemoveWorkTask?id=" + id,
+                type: "POST",
+                dataType: "json",
+                success: function (data, status, jqXHR)
+                {
+                    layer.closeAll();
+
+                    if (data.Success)
+                    {
+                        removeWorkTaskDiv(id);
+
+                    } else
+                    {
+                        layerAlert(data.Message);
+                    }
+                },
+                error: function (xmlHttpRequest)
+                {
+                    layer.closeAll();
+
+                    alert("Error: " + xmlHttpRequest.status);
+                }
+            });
+        });
+    }
+
+    function createWorkTaskSave()
+    {
+        $("#divWorkTaskEditMask").show();
+
+        var workTask = new Object();
+
+        workTask.Domain = '@ViewBag.Domain.Id';
+        workTask.WorkType = $("#txtWorkTypeId").val();
+        workTask.Name = $("#txtWorkTaskName").val();
+
+        $.ajax({
+            url: "/Api/Settings/CreateWorkTask",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(workTask),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    workTask.Id = data.Data.Id;
+
+                    addWorkTaskDiv(workTask);
+
+                    closeAllLayer();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function modifyWorkTaskSave()
+    {
+        $("#divWorkTaskEditMask").show();
+
+        var workTask = new Object();
+
+        workTask.Id = $("#txtWorkTaskId").val();
+        workTask.Domain = '@ViewBag.Domain.Id';
+        workTask.WorkType = $("#txtWorkTypeId").val();
+        workTask.Name = $("#txtWorkTaskName").val();
+
+        $.ajax({
+            url: "/Api/Settings/UpdateWorkTask",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(workTask),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    updateWorkTaskDiv(workTask);
+
+                    closeAllLayer();
+
+                } else
+                {
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+    function addWorkTaskDiv(workTask)
+    {
+        var tableWorkTask = document.getElementById("tableWorkTask_" + workTask.WorkType);
+        var row = tableWorkTask.insertRow(tableWorkTask.rows.length - 1);
+
+        var innerHtml = "<tr>\
+                            <td height=\"40\" id=\"tdWorkTask_" + workTask.Id + "\"><a href=\"javascript:void(0)\" class=\"a_blue_15\" onclick=\"modifyWorkTask('" + workTask.Id + "','" + workTask.Name + "','" + workTask.WorkType + "')\">" + workTask.Name + "</a></td>\
+                        </tr>";
+
+        $(row).html(innerHtml);
+    }
+
+    function updateWorkTaskDiv(workTask)
+    {
+        var innerHTML = "<a href='javascript:void(0)'  class='a_blue_15' onclick=\"modifyWorkTask('" + workTask.Id + "','" + workTask.Name + "','" + workTask.WorkType + "')\">" + workTask.Name + "</a>";
+        $("#tdWorkTask_" + workTask.Id).html(innerHTML);
+    }
+
+    function removeWorkTaskDiv(id)
+    {
+        $("#tdWorkTask_" + id).slideUp(300, function ()
+        {
+            $("#divWorkTask_" + id).remove();
+        });
+    }
+
+</script>
+<div id="divContent">
+    <div id="divContainerTitle">周报</div>
+
+    <div style="position:absolute; top:70px; bottom:0px;left:20px;width:200px; OVERFLOW :auto; ">
+        @Html.Partial("_WeeklyReportMenu")
+    </div>
+
+    <div style="position:absolute; top:70px; bottom:10px;left:220px;width:1px; background-color:#D4D4D4">
+    </div>
+</div>
+
+
+<div style=" position:absolute; top:70px; bottom:0px;left:260px;right:20px;OVERFLOW-Y: auto;">
+    <div style="margin-left:20px;">
+        <input name="btnCreateChildOrganization" type="button" class="btn_blue" id="btnCreateChildOrganization" value="新增项目" onclick="createWorkType()" />
+        <span class="font_gray_15" style="margin-left:30px;">新增的项目需要到人员管理中分配给相应的人员，他们才可以填写相应的周报。</span>
+    </div>
+
+    <div style="position:absolute; top:50px; bottom:0px;left:0px; right:0px ;OVERFLOW-Y: hidden; ">
+
+        <div style="margin-top:5px; background-color:#ccc; height:1px"></div>
+
+        <div id="divWorkTypeContainer" style="position:absolute;bottom:0px; top:20px; left:20px; right:20px; overflow:auto">
+            @foreach (var workType in Model.WorkTypeList)
+            {
+                <div id="divWorkType_@workType.Id" style="margin-bottom:20px;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td height="40" id="tdWorkType_@workType.Id"><a href="javascript:void(0)" class="a_blue_17" onclick="modifyWorkType('@workType.Id','@workType.Name')">@workType.Name</a></td>
+                        </tr>
+                    </table>
+
+                    <table id="tableWorkTask_@workType.Id" border="0" cellspacing="0" cellpadding="0" style="margin-left:30px;">
+                        @foreach (var workTask in from c in Model.WorkTaskList where c.WorkType == workType.Id select c)
+                        {
+                            <tr id="trWorkTask_@workTask.Id">
+                                <td height="40" id="tdWorkTask_@workTask.Id"><a href="javascript:void(0)" class="a_blue_15" onclick="modifyWorkTask('@workTask.Id','@workTask.Name','@workTask.WorkType')">@workTask.Name</a></td>
+                            </tr>
+                        }
+                        <tr>
+                            <td height="40">
+                                <input type="button" class="btn_blue" value="新增子项目" onclick="createWorkTask('@workType.Id')" />
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            }
+
+            @*<table width="100%" border="0" cellspacing="0" cellpadding="0" id="tableBody">
+                @foreach (var item in Model.WorkTypeList)
+                {
+                    <tr id="tr_@item.Id">
+                        <td height="40"><a href="javascript:void(0)" class="a_blue_15" onclick="modifyWorkType('@item.Id','@item.Name')">@item.Name</a></td>
+                    </tr>
+                }
+            </table>*@
+        </div>
+
+    </div>
+
+</div>
+
+<!--项目名称编辑-->
+<div id="divWorkTypeEdit" style="display:none">
+    <div id="divWorkTypeEditMask" style=" display:none; position:absolute;top:0px;right:0px;bottom:0px;left:0px;background-color:white">
+        <div style="margin-left:30px;margin-top:20px;">请稍候...</div>
+    </div>
+    <table width="100%" style="padding-left:30px;padding-right:20px;" border="0" align="center" cellpadding="0" cellspacing="0" id="tableEdit">
+        <tr>
+            <td>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <!--如果不加 return false，按回车时页面会刷新-->
+                <form id="formWorkTypeEdit" onsubmit="return false;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="100" height="50">名称：</td>
+                            <td>
+                                <input type="hidden" name="txtWorkTypeId" id="txtWorkTypeId">
+                                <input name="txtWorkTypeName" type="text" class="input_18" style="width:300px;" id="txtWorkTypeName" maxlength="50" keyenter /> *
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="130" height="50"><input name="btnRemoveWorkType" type="button" class="btn_red" id="btnRemoveWorkType" value="删 除" onclick="removeWorkType()" style="display:none" /></td>
+                        <td align="right">
+                            <input name="btnSaveWorkType" type="button" class="btn_blue" id="btnSaveWorkType" value="保 存" onclick="saveWorkType()" /><input name="btnCancelEditWorkType" type="button" class="btn_blue" id="btnCancelEditWorkType" value="取 消" style="margin-left:1px;" onclick="    closeAllLayer()" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<!--子项目编辑-->
+<div id="divWorkTaskEdit" style="display:none">
+    <div id="divWorkTaskEditMask" style=" display:none; position:absolute;top:0px;right:0px;bottom:0px;left:0px;background-color:white">
+        <div style="margin-left:30px;margin-top:20px;">请稍候...</div>
+    </div>
+    <table width="100%" style="padding-left:30px;padding-right:20px;" border="0" align="center" cellpadding="0" cellspacing="0" id="tableEdit">
+        <tr>
+            <td>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <!--如果不加 return false，按回车时页面会刷新-->
+                <form id="formWorkTaskEdit" onsubmit="return false;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="100" height="50">名称：</td>
+                            <td>
+                                <input type="hidden" name="txtWorkTypeId" id="txtWorkTypeId">
+                                <input type="hidden" name="txtWorkTaskId" id="txtWorkTaskId">
+                                <input name="txtWorkTaskName" type="text" class="input_18" style="width:300px;" id="txtWorkTaskName" maxlength="50" keyenter /> *
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <table width="50%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td>&nbsp;</td>
+                    </tr>
+                </table>
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="130" height="50"><input name="btnRemoveWorkTask" type="button" class="btn_red" id="btnRemoveWorkTask" value="删 除" onclick="removeWorkTask()" style="display:none" /></td>
+                        <td align="right">
+                            <input name="btnSaveWorkTask" type="button" class="btn_blue" id="btnSaveWorkTask" value="保 存" onclick="saveWorkTask()" /><input name="btnCancelEditWorkTask" type="button" class="btn_blue" id="btnCancelEditWorkTask" value="取 消" style="margin-left:1px;" onclick="    closeAllLayer()" />
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>

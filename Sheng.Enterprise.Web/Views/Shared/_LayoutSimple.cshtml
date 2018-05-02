@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/common")
+    @Scripts.Render("~/Scripts/layer/layer.js")
+    @Scripts.Render("~/Scripts/json2.js")
+</head>
+<body>
+    <div id="divTopBar">
+        <table id="tableTopBar" width="98%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td width="30">&nbsp;</td>
+                <td class="font_drakblue_18">升讯威周报与绩效考核平台</td>
+                <td>&nbsp;</td>
+            </tr>
+        </table>
+    </div>
+    <div id="divContainer" style="OVERFLOW-Y: auto; ">
+        @RenderBody()
+    </div>
+
+   
+
+</body>
+</html>

@@ -1,0 +1,118 @@
+﻿
+@{
+    ViewBag.Title = "反馈";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    ViewBag.LeftTitle = "设 置";
+    ViewBag.MainMenu = "Settings";
+    ViewBag.LeftMenu = "Feedback";
+}
+
+<script>
+
+    $(document).ready(function ()
+    {
+        $("[keyenter]").keypress(function (e)
+        {
+            if (e.keyCode == 13)
+            {
+                send();
+            }
+        });
+
+        heartbeat();
+    });
+
+    function send()
+    {
+        if ($("#form").validate({
+            rules: {
+                       "txtContent": "required"
+        },
+            messages: {
+                       "txtContent": "!"
+        }
+        }).form() == false)
+        {
+            return;
+        }
+
+        var feedBack = new Object();
+        feedBack.Name = $("#txtName").val();
+        feedBack.Contact = $("#txtContact").val();
+        feedBack.Content = $("#txtContent").val();
+
+        var layerIndex = layer.load(0, {
+            shade: [0.2, '#fff']
+        });
+
+        $.ajax({
+            url: "/Api/Settings/FeedBack",
+            type: "POST",
+            dataType: "json",
+            data: JSON.stringify(feedBack),
+            success: function (data, status, jqXHR)
+            {
+                if (data.Success)
+                {
+                    $("#btnSend").attr("disabled", "disabled");
+
+                    layer.close(layerIndex);
+
+                    layerAlert("您的反馈已经提交，感谢您的支持。");
+                } else
+                {
+                    layer.closeAll();
+
+                    layerAlert(data.Message);
+                }
+            },
+            error: function (xmlHttpRequest)
+            {
+                alert("Error: " + xmlHttpRequest.status);
+            }
+        });
+    }
+
+</script>
+
+    <div id="divContent">
+        <div id="divContainerTitle">
+            反馈
+        </div>
+
+        <div style="margin-left:40px;margin-bottom:30px;margin-top:30px;">
+            <form id="form">
+                <table width="600" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="150" height="50" valign="top">称呼：</td>
+                        <td valign="top"><input name="txtName" type="text" class="input_18" style="width:350px;" id="txtName" maxlength="25" keyenter /></td>
+                    </tr>
+                    <tr>
+                        <td height="50" valign="top">联系方式：</td>
+                        <td valign="top"><input name="txtContact" type="text" class="input_18" style="width:350px;" id="txtContact" maxlength="50" keyenter /></td>
+                    </tr>
+                    <tr>
+                        <td height="50" valign="top">反馈内容：</td>
+                        <td valign="top"><textarea rows="6" name="txtContent" type="text" class="input_18" style="width:350px;" id="txtContent" maxlength="1000"></textarea></td>
+                    </tr>
+                    <tr>
+                        <td height="50">&nbsp;</td>
+                        <td>
+                            <span class="font_gray_15" style="">感谢您的支持</span>
+                        </td>
+                    </tr>
+                </table>
+           </form>
+</div>
+        <div style="margin-left:40px;">
+
+            <table width="500" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td height="50"><input name="btnSend" type="button" class="btn_blue" id="btnSend" value="发 送" onclick="send()" /></td>
+                </tr>
+
+            </table>
+        </div>
+
+    </div>
